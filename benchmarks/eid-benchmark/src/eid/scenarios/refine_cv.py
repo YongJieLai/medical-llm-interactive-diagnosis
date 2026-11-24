@@ -16,6 +16,9 @@ The decision is a deterministic rule tree in Python (not a free-form LLM verdict
 
 from __future__ import annotations
 
+import json
+import os
+import re
 from typing import TYPE_CHECKING
 
 from eid.agents import create_agent
@@ -59,6 +62,19 @@ class RefineCVScenario(BaseScenario):
     ENABLE_GAP_CHECK = True
     ENABLE_REFUTATION = True
 
+    # P2: inject an external differential-diagnosis knowledge base into the
+    # verifier so that its REFUTATION counter-evidence / alternative are grounded
+    # in real medical knowledge instead of the verifier's (limited) memory.
+    #
+    # ⚠️ ORACLE KB: the default DDX_KB_PATH points to a KB whose disease set ==
+    # the 60-case answer diseases (test-set prior leakage). Results with this KB
+    # are a KNOWLEDGE-CEILING analysis, NOT a formal RAG method. For a formal
+    # RAG evaluation, set DDX_KB_PATH to an independent, larger knowledge base.
+    ENABLE_RAG = False
+    DDX_KB_PATH = os.environ.get(
+        "DDX_KB_PATH", "/workspace/medical_llm_exp/data/ddx_knowledge.json"
+    )
+
     def __init__(
         self,
         dataset_name: str,
@@ -83,16 +99,99 @@ class RefineCVScenario(BaseScenario):
         self._ds_client, self._ds_model = get_llm(self.VERIFIER_PROVIDER)
         if self.VERIFIER_MODEL:
             self._ds_model = self.VERIFIER_MODEL
+        self._ddx_kb: dict | None = None  # lazily loaded external DDX knowledge
 
     # ------------------------------------------------------------------ #
     # Verification helpers
     # ------------------------------------------------------------------ #
-    def _verify(self, summary: str, diagnostician_output: str, prev_diagnosis: str | None) -> dict:
+    def _load_ddx_kb(self) -> dict:
+        """Load (once) the external differential-diagnosis knowledge base."""
+        if self._ddx_kb is None:
+            try:
+                with open(self.DDX_KB_PATH, encoding="utf-8") as f:
+                    self._ddx_kb = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):  # pragma: no cover
+                self._ddx_kb = {}
+        return self._ddx_kb
+
+    @staticmethod
+    def _norm_med(s: str) -> str:
+        """Normalise a medical term for fuzzy matching.
+
+        Handles the common name variants seen in MedQA: possessive 's
+        ("Hirschsprung's disease" == "Hirschsprung disease", "Bowen's" == "Bowen"),
+        parenthetical aliases, and any punctuation/whitespace differences.
+        """
+        s = re.sub(r"['\u2019]s\b", " ", s or "")  # drop possessive 's
+        s = re.sub(r"\([^)]*\)", " ", s)  # drop parenthetical aliases
+        s = re.sub(r"[^a-z0-9]+", " ", s.lower())
+        return " ".join(s.split())
+
+    def _retrieve_ddx(self, diagnosis: str) -> str:
+        """Return a compact knowledge snippet for `diagnosis`, or '' if unknown.
+
+        Matching is fuzzy: we find the longest KB key that is a substring of the
+        (normalised) diagnosis, or vice-versa, so that verbose model output like
+        "Lung cancer (with paraneoplastic SIADH causing hyponatremia)" still
+        resolves to the "lung cancer with paraneoplastic siadh" entry.
+        """
+        if not diagnosis:
+            return ""
+        kb = self._load_ddx_kb()
+        if not kb:
+            return ""
+        d = self._norm_med(diagnosis)
+        best_key, best_len = None, 0
+        for key, entry in kb.items():
+            k = self._norm_med(key)
+            if not k:
+                continue
+            if k in d or d in k:
+                if len(k) > best_len:
+                    best_key, best_len = key, len(k)
+        if best_key is None:
+            return ""
+        entry = kb[best_key]
+        lines = []
+        ddx = entry.get("differential_diagnoses", [])
+        if ddx:
+            lines.append("Differential diagnoses:")
+            for item in ddx:
+                if isinstance(item, dict) and item.get("name"):
+                    feat = item.get("distinguishing_feature", "")
+                    lines.append(f"- {item['name']}: {feat}")
+        kf = entry.get("key_features", [])
+        if kf:
+            lines.append("Key features: " + "; ".join(str(x) for x in kf))
+        pit = entry.get("pitfalls", [])
+        if pit:
+            lines.append("Common pitfalls: " + "; ".join(str(x) for x in pit))
+        return "\n".join(lines)
+
+    def _verify(
+        self,
+        summary: str,
+        diagnostician_output: str,
+        prev_diagnosis: str | None,
+        current_diagnosis: str | None = None,
+    ) -> dict:
         """Call the cross-model verifier (DeepSeek) and return its parsed JSON."""
         sys_prompt = self.prompts.get_verifier_cv_system_prompt()
         user_prompt = self.prompts.get_verifier_cv_user_prompt(
             summary, diagnostician_output, prev_diagnosis
         )
+        if self.ENABLE_RAG:
+            # Ground the verifier's refutation in external DDX knowledge for the
+            # current candidate diagnosis. This is the P2 knowledge-injection point.
+            ddx_snippet = self._retrieve_ddx(current_diagnosis or prev_diagnosis or "")
+            if ddx_snippet:
+                user_prompt += (
+                    "\n\n### External Differential-Diagnosis Knowledge (authoritative) ###\n"
+                    "Use the following knowledge to propose a clinically VALID alternative "
+                    "diagnosis and counter-evidence. Do NOT invent alternatives outside this "
+                    "list unless none is relevant.\n"
+                    f"{ddx_snippet}"
+                )
         try:
             resp = _llm_chat(
                 self._ds_client,
@@ -119,6 +218,36 @@ class RefineCVScenario(BaseScenario):
             for c in verification.get("claim_checks", [])
             if str(c.get("verdict", "")).upper() in _BAD_VERDICTS
         ]
+
+    @staticmethod
+    def _same_diagnosis(prev: str, cur: str) -> bool:
+        """Deterministic anchoring check: is the current diagnosis unchanged?
+
+        NOTE: the anchoring signal (diagnosis unchanged across verification
+        rounds) is a RULE-TREE decision made here in Python, NOT the verifier
+        LLM's `refutation.triggered` field. The previous implementation relied
+        on the LLM to set triggered=true, which structurally deadlocked the
+        refute-only ablation (prev_diagnosis stayed None, so the LLM never saw
+        a "previous diagnosis" and never triggered).
+        """
+        import re
+
+        def norm(s: str) -> str:
+            s = (s or "").strip().lower()
+            s = re.sub(r"[^\w\s-]", " ", s)  # drop punctuation
+            s = re.sub(r"\s+", " ", s).strip()
+            # strip common hedging/diagnostic prefixes so the core entity matches
+            for w in (
+                "most likely", "likely", "consistent with", "provisional",
+                "probable", "possible", "diagnosis", "diagnosis of",
+            ):
+                s = s.replace(w, " ")
+            return re.sub(r"\s+", " ", s).strip()
+
+        p, c = norm(prev), norm(cur)
+        if not p or not c:
+            return False
+        return p == c or p in c or c in p
 
     def run(self, case_input: CaseInput) -> ScenarioResult:
         """Execute REFINE-CV on a single case."""
@@ -286,7 +415,12 @@ class RefineCVScenario(BaseScenario):
         })
 
         # 3) Cross-model verification (DeepSeek)
-        verification = self._verify(summary, d_response, prev_diagnosis)
+        # Extract the current diagnosis first so P2 RAG can ground the verifier's
+        # refutation in external knowledge about THAT diagnosis.
+        _, _current_dx = self.extract_action(d_response)
+        verification = self._verify(
+            summary, d_response, prev_diagnosis, current_diagnosis=_current_dx
+        )
         trace.append({
             "role_id": "verifier",
             "content": verification,
@@ -310,7 +444,10 @@ class RefineCVScenario(BaseScenario):
                 "content": d_response,
                 "duration": diagnostician.get_last_duration(),
             })
-            verification = self._verify(summary, d_response, prev_diagnosis)
+            _, _current_dx = self.extract_action(d_response)
+            verification = self._verify(
+                summary, d_response, prev_diagnosis, current_diagnosis=_current_dx
+            )
             trace.append({
                 "role_id": "verifier",
                 "content": verification,
@@ -326,12 +463,23 @@ class RefineCVScenario(BaseScenario):
         refutation = (verification.get("refutation", {}) or {}) if self.ENABLE_REFUTATION else {}
         gaps = (verification.get("gaps", []) or []) if self.ENABLE_GAP_CHECK else []
 
+        # Anchoring is a DETERMINISTIC rule-tree check (prev == current), NOT the
+        # LLM's `refutation.triggered` field. The LLM field is only used to source
+        # the counter-evidence / alternative wording when available.
+        anchored = (
+            self.ENABLE_REFUTATION
+            and prev_diagnosis is not None
+            and self._same_diagnosis(prev_diagnosis, answer)
+        )
+
         # GATHER feedback: priority to refutation (break anchoring) then gaps.
-        if refutation.get("triggered") and current_turn < self.max_turns - 1:
+        if anchored and current_turn < self.max_turns - 1:
+            counter = refutation.get("counter_evidence", "") or ""
+            alt = refutation.get("alternative", "") or ""
             feedback = (
                 f"The diagnosis '{answer}' is unchanged from the previous round. "
-                f"Counter-evidence to verify: {refutation.get('counter_evidence', '')}. "
-                f"Also consider this not-yet-excluded alternative: {refutation.get('alternative', '')}."
+                f"Counter-evidence to verify: {counter}. "
+                f"Also consider this not-yet-excluded alternative: {alt}."
             )
             self._gather(doctor, patient, reporter, trace, feedback)
             return answer, answer, "GATHER"

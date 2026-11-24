@@ -39,10 +39,48 @@ class RefineCVQwenGapOnlyScenario(RefineCVQwenScenario):
 
 
 class RefineCVQwenRefuteOnlyScenario(RefineCVQwenScenario):
-    """Same-model verification with REFUTATION trigger only."""
+    """[DEPRECATED] Same-model verification with REFUTATION trigger only.
+
+    BUG: this ablation is structurally deadlocked. REFUTATION fires only when a
+    "previous diagnosis" exists, but prev_diagnosis is only updated by the GATHER
+    path — which requires gap (or claim) to be enabled. With both disabled, every
+    case runs exactly ONE verification pipeline with prev_diagnosis=None, so the
+    refutation trigger never fires (verified: 0/60 traces). Use
+    RefineCVQwenGapRefuteScenario instead to measure refutation's isolated
+    contribution in a multi-round environment.
+    """
 
     ENABLE_CLAIM_CHECK = False
     ENABLE_GAP_CHECK = False
+
+
+class RefineCVQwenGapRefuteScenario(RefineCVQwenScenario):
+    """GAP CHECK + REFUTATION (no claim check).
+
+    This is the correct way to isolate REFUTATION's contribution: gap check
+    creates the multi-round environment (prev_diagnosis gets populated), and
+    refutation then fires when the diagnosis is unchanged across rounds.
+    Contrast with RefineCVQwenGapOnlyScenario (= gap without refutation) to get
+    the NET contribution of refutation.
+    """
+
+    ENABLE_CLAIM_CHECK = False
+    ENABLE_GAP_CHECK = True
+    ENABLE_REFUTATION = True
+
+
+class RefineCVQwenGapRefuteRAGScenario(RefineCVQwenGapRefuteScenario):
+    """GAP + REFUTATION + external DDX-KB (knowledge-grounded refutation).
+
+    Same as GapRefute but with ENABLE_RAG=True: the verifier's refutation
+    counter-evidence / alternative are grounded in the external differential
+    diagnosis knowledge base instead of the verifier's (limited) memory.
+
+    ⚠️ ORACLE KB — the KB disease set == the answer diseases, so results are a
+    KNOWLEDGE-CEILING analysis, not a formal RAG method.
+    """
+
+    ENABLE_RAG = True
 
 
 class RefineCVQwenMaxScenario(RefineCVScenario):

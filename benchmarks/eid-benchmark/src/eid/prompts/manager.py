@@ -660,3 +660,59 @@ class PromptManager:
             "2. Do not repeat a question or test already asked.\n"
             "Doctor:"
         )
+
+    # =========================================================================
+    # DiagnosticGate Mode Prompts (method-agnostic verifier)
+    # =========================================================================
+
+    def get_verifier_gate_system_prompt(self) -> str:
+        """System prompt for the method-agnostic verifier (DiagnosticGate).
+
+        Unlike the REFINE-CV verifier, this one does NOT depend on the host
+        method emitting a structured [EVIDENCE] list. It receives an evidence
+        state + a proposed diagnosis, extracts the key findings itself, and
+        audits them. Outputs strict JSON.
+        """
+        return (
+            "You are a strict clinical verification auditor. You do NOT re-diagnose; you verify "
+            "a proposed diagnosis against the evidence state.\n"
+            "You will receive: (1) an evidence state (all clinical information gathered so far), "
+            "(2) a proposed diagnosis, and (3) optionally a previous diagnosis.\n"
+            "\n"
+            "Perform THREE checks and output STRICT JSON (no prose outside the JSON):\n"
+            "\n"
+            "1. CLAIM CHECK: extract the 2-4 key findings that the proposed diagnosis depends on, "
+            "and for each set verdict to one of:\n"
+            "   - SUPPORTED: the finding is present in the evidence state;\n"
+            "   - CONTRADICTED: the finding is the OPPOSITE of what the evidence state says;\n"
+            "   - HALLUCINATED: the diagnosis depends on a finding (especially a negative test "
+            "result) that is NOT in the evidence state;\n"
+            "   - UNDETERMINED: the diagnosis treats a 'pending'/'not specified' result as a definite finding.\n"
+            "   If no key findings can be extracted, return an empty list.\n"
+            "\n"
+            "2. GAP CHECK: list the top 2-3 missing pieces of information that would best "
+            "discriminate the proposed diagnosis from its main alternatives. These must be facts "
+            "NOT present in the evidence state. Return an empty list if the diagnosis is already decisive.\n"
+            "\n"
+            "3. REFUTATION: if a previous diagnosis is provided AND it equals the current diagnosis "
+            "(an anchoring signal), set triggered=true and give the SINGLE strongest piece of "
+            "counter-evidence against that diagnosis plus ONE alternative diagnosis not yet excluded. "
+            "Otherwise triggered=false with empty strings.\n"
+            "\n"
+            "Output exactly this JSON shape:\n"
+            '{"claim_checks": [{"statement": str, "verdict": "SUPPORTED|CONTRADICTED|HALLUCINATED|UNDETERMINED"}], '
+            '"gaps": [{"info": str, "discriminates": str}], '
+            '"refutation": {"triggered": bool, "counter_evidence": str, "alternative": str}}'
+        )
+
+    def get_verifier_gate_user_prompt(
+        self, evidence_state: str, diagnosis: str, prev_diagnosis: str | None
+    ) -> str:
+        """User prompt for the method-agnostic verifier."""
+        prev = prev_diagnosis if prev_diagnosis else "(none)"
+        return (
+            f"### Evidence State ###\n{evidence_state}\n\n"
+            f"### Proposed Diagnosis ###\n{diagnosis}\n\n"
+            f"### Previous Diagnosis (for anchoring check) ###\n{prev}\n\n"
+            "Return STRICT JSON only."
+        )

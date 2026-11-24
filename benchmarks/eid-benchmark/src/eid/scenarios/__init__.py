@@ -18,11 +18,14 @@ from eid.scenarios.refine_cv_ablations import (
     RefineCVQwenCheckOnlyScenario,
     RefineCVQwenGapOnlyScenario,
     RefineCVQwenRefuteOnlyScenario,
+    RefineCVQwenGapRefuteScenario,
+    RefineCVQwenGapRefuteRAGScenario,
     RefineCVQwenMaxScenario,
     RefineCVGLMScenario,
 )
 from eid.scenarios.refine_sc import RefineSCScenario
 from eid.scenarios.meddxagent import MEDDxAgentScenario
+from eid.scenarios.meddxagent_gate import MEDDxAgentGateScenario
 from eid.scenarios.clinicalagents import ClinicalAgentsScenario
 
 __all__ = [
@@ -40,10 +43,13 @@ __all__ = [
     "RefineCVQwenCheckOnlyScenario",
     "RefineCVQwenGapOnlyScenario",
     "RefineCVQwenRefuteOnlyScenario",
+    "RefineCVQwenGapRefuteScenario",
+    "RefineCVQwenGapRefuteRAGScenario",
     "RefineCVQwenMaxScenario",
     "RefineCVGLMScenario",
     "RefineSCScenario",
     "MEDDxAgentScenario",
+    "MEDDxAgentGateScenario",
     "ClinicalAgentsScenario",
     "get_scenario",
 ]
@@ -92,10 +98,13 @@ def get_scenario(
         "refine_cv_qwen_check": RefineCVQwenCheckOnlyScenario,
         "refine_cv_qwen_gap": RefineCVQwenGapOnlyScenario,
         "refine_cv_qwen_refute": RefineCVQwenRefuteOnlyScenario,
+        "refine_cv_qwen_gap_refute": RefineCVQwenGapRefuteScenario,
+        "refine_cv_qwen_gap_refute_rag": RefineCVQwenGapRefuteRAGScenario,
         "refine_cv_qwenmax": RefineCVQwenMaxScenario,
         "refine_cv_glm": RefineCVGLMScenario,
         "refine_sc": RefineSCScenario,
         "meddxagent": MEDDxAgentScenario,
+        "meddxagent_gate": MEDDxAgentGateScenario,
         "clinicalagents": ClinicalAgentsScenario,
     }
 
@@ -183,6 +192,8 @@ def get_scenario(
         "refine_cv_qwen_check",
         "refine_cv_qwen_gap",
         "refine_cv_qwen_refute",
+        "refine_cv_qwen_gap_refute",
+        "refine_cv_qwen_gap_refute_rag",
         "refine_cv_qwenmax",
         "refine_cv_glm",
     ):

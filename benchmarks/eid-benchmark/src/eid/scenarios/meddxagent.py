@@ -63,14 +63,29 @@ Output format:
 [PROFILE] followed by the updated structured patient profile."""
 
 
-def _doctor_turn_instruction(current_turns: int, max_turns: int, patient_profile: str, last_reply: str) -> str:
+def _doctor_turn_instruction(
+    current_turns: int,
+    max_turns: int,
+    patient_profile: str,
+    last_reply: str,
+    gate_feedback: str = "",
+) -> str:
     force = ""
     if current_turns >= max_turns:
         force = "\nThis is the FINAL turn. You MUST issue a [DIAGNOSIS] now with your single most likely diagnosis."
+    fb = ""
+    if gate_feedback:
+        fb = (
+            "\n\n### SUPERVISOR FEEDBACK (address this with your next action) ###\n"
+            f"{gate_feedback}\n"
+            "Respond with ONE action: a targeted [QUERY]/[TEST] to acquire the missing or "
+            "verification evidence, or a corrected [DIAGNOSIS]."
+        )
     return (
         f"Turns used: {current_turns} / {max_turns}.\n"
         f"Current Patient Profile:\n{patient_profile}\n\n"
         f"Last reply:\n{last_reply}\n"
+        f"{fb}"
         f"{force}\n\n"
         "Doctor:"
     )
@@ -103,6 +118,9 @@ class MEDDxAgentScenario(BaseScenario):
         self.reporter_config = reporter_config
         self.max_turns = max_turns
         self.prompts = PromptManager(dataset_name)
+        # Method-agnostic verification gate. None = baseline (no gate).
+        # Subclasses set this to a DiagnosticGate to enable the plugin.
+        self.gate = None
 
     def run(self, case_input: CaseInput) -> ScenarioResult:
         patient_facts_str = "\n".join(case_input.patient_facts)
@@ -149,6 +167,8 @@ class MEDDxAgentScenario(BaseScenario):
         last_reply = ""
         answer = ""
         current_turn = 0
+        prev_diagnosis: str | None = None
+        gate_feedback = ""
 
         while current_turn <= self.max_turns:
             instruction = _doctor_turn_instruction(
@@ -156,6 +176,7 @@ class MEDDxAgentScenario(BaseScenario):
                 max_turns=self.max_turns,
                 patient_profile=patient_profile,
                 last_reply=last_reply,
+                gate_feedback=gate_feedback,
             )
 
             doctor_response = doctor.step(instruction)
@@ -170,8 +191,33 @@ class MEDDxAgentScenario(BaseScenario):
             action_type, action_content = self.extract_action(doctor_response)
 
             if action_type == "diagnosis":
-                answer = action_content
-                break
+                if self.gate is None:
+                    answer = action_content
+                    break
+
+                candidate = action_content
+                decision = self.gate.decide(
+                    evidence_state=patient_profile,
+                    diagnosis=candidate,
+                    prev_diagnosis=prev_diagnosis,
+                    current_turn=current_turn,
+                    max_turns=self.max_turns,
+                )
+                trace.append({
+                    "role_id": "gate",
+                    "content": decision.verification,
+                    "duration": None,
+                })
+
+                if decision.action == "PASS":
+                    answer = candidate
+                    break
+
+                # Rejected: record for anchoring check, feed back, keep going.
+                prev_diagnosis = candidate
+                gate_feedback = decision.feedback
+                current_turn += 1
+                continue
 
             current_turn += 1
 
@@ -218,6 +264,12 @@ class MEDDxAgentScenario(BaseScenario):
             if match:
                 patient_profile = match.group(1).strip()
 
+        # Fallback: if the gate kept rejecting until the turn budget ran out,
+        # fall back to the last candidate diagnosis (it is still the host's
+        # best answer, just not gated-PASS).
+        if not answer and prev_diagnosis:
+            answer = prev_diagnosis
+
         role_records = self._collect_role_records([
             ("doctor", doctor),
             ("patient", patient),
@@ -229,7 +281,7 @@ class MEDDxAgentScenario(BaseScenario):
             answer=answer,
             trace=trace,
             metadata={
-                "mode": "meddxagent",
+                "mode": "meddxagent_gate" if self.gate is not None else "meddxagent",
                 "turns": current_turn,
                 "max_turns": self.max_turns,
                 "role_records": role_records,
