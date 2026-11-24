@@ -302,6 +302,7 @@ class RefineCVScenario(BaseScenario):
         answer = ""
         current_turn = 0
         prev_diagnosis: str | None = None
+        gather_count = 0  # P0-3: cap GATHER rounds to prevent dead-loop over-questioning
 
         while current_turn <= self.max_turns:
             instruction = self.prompts.get_doctor_turn_instruction(
@@ -331,7 +332,10 @@ class RefineCVScenario(BaseScenario):
                     current_turn=current_turn,
                     prev_diagnosis=prev_diagnosis,
                 )
-                if decision == "PASS" or current_turn >= self.max_turns - 1:
+                if decision == "GATHER":
+                    gather_count += 1
+                # P0-3: accept after at most 2 gather rounds (avoid dead-loop)
+                if decision == "PASS" or current_turn >= self.max_turns - 1 or gather_count >= 2:
                     break
                 # decision == "GATHER": continue the loop to acquire evidence
                 current_turn += 1
@@ -462,6 +466,9 @@ class RefineCVScenario(BaseScenario):
         # 5) Decide next action
         refutation = (verification.get("refutation", {}) or {}) if self.ENABLE_REFUTATION else {}
         gaps = (verification.get("gaps", []) or []) if self.ENABLE_GAP_CHECK else []
+        # P0-2: gap gating — only pursue gaps when the verifier judges the
+        # diagnosis NOT yet decisive (fixes "always list 3 gaps" over-questioning).
+        decisive = bool(verification.get("decisive", True))
 
         # Anchoring is a DETERMINISTIC rule-tree check (prev == current), NOT the
         # LLM's `refutation.triggered` field. The LLM field is only used to source
@@ -484,7 +491,7 @@ class RefineCVScenario(BaseScenario):
             self._gather(doctor, patient, reporter, trace, feedback)
             return answer, answer, "GATHER"
 
-        if gaps and current_turn < self.max_turns - 1:
+        if gaps and not decisive and current_turn < self.max_turns - 1:
             top = gaps[0]
             feedback = (
                 f"Missing discriminating information: {top.get('info', '')} "

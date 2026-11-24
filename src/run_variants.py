@@ -49,8 +49,14 @@ def build_doctor(provider: str) -> ModelConfig:
             api_url="https://open.bigmodel.cn/api/paas/v4",
             api_key=os.environ.get("ZHIPU_API_KEY"),
         )
-    # qwen-plus / qwen-max 等均走 .env 的 DashScope 兼容端点
-    return ModelConfig.from_string(provider)
+    # qwen-plus / qwen-max 等走 DashScope OpenAI 兼容端点（显式传 key，不依赖 .env）
+    return ModelConfig.from_string(
+        provider,
+        api_url=os.environ.get(
+            "DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+        ),
+        api_key=os.environ.get("DASHSCOPE_API_KEY"),
+    )
 
 
 def main():

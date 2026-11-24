@@ -100,3 +100,24 @@ class RefineCVGLMScenario(RefineCVScenario):
     """
 
     VERIFIER_PROVIDER = "glm"
+
+
+class RefineCVQwenRAGScenario(RefineCVQwenScenario):
+    """Same-model verification + external DDX knowledge injection (P2).
+
+    Tests whether grounding the verifier in a differential-diagnosis knowledge
+    base rescues the REFUTATION component (whose counter-evidence / alternative
+    were previously limited by the verifier's own knowledge).
+
+    ⚠️ ORACLE-KB experiment: the default DDX_KB_PATH is built from the 60-case
+    answer diseases (test-set prior leakage). Results here are a knowledge-ceiling
+    analysis, NOT a formal RAG method. See RefineCVScenario.ENABLE_RAG.
+    """
+
+    ENABLE_RAG = True
+
+
+class RefineCVQwenRefuteOnlyRAGScenario(RefineCVQwenRefuteOnlyScenario):
+    """REFUTATION-only + external DDX knowledge injection (P2, oracle KB)."""
+
+    ENABLE_RAG = True

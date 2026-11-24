@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-AVAILABLE_MODES = ["cot", "roleplay", "react", "sc", "refine", "refine_hpr", "refine_eg", "refine_cv", "refine_cv_qwen", "refine_cv_qwen_check", "refine_cv_qwen_gap", "refine_cv_qwen_refute", "refine_cv_qwen_gap_refute", "refine_cv_qwen_gap_refute_rag", "refine_cv_qwenmax", "refine_cv_glm", "refine_sc", "meddxagent", "meddxagent_gate", "clinicalagents"]
+AVAILABLE_MODES = ["cot", "roleplay", "react", "sc", "refine", "refine_hpr", "refine_eg", "refine_cv", "refine_cv_qwen", "refine_cv_qwen_check", "refine_cv_qwen_gap", "refine_cv_qwen_refute", "refine_cv_qwen_gap_refute", "refine_cv_qwen_gap_refute_rag", "refine_cv_qwen_rag", "refine_cv_qwen_refute_rag", "refine_cv_qwenmax", "refine_cv_glm", "refine_sc", "meddxagent", "meddxagent_gate", "clinicalagents"]
 
 
 def main(argv: list[str] | None = None) -> None:

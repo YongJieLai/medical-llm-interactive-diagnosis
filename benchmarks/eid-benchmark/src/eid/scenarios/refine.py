@@ -301,8 +301,11 @@ class RefineScenario(BaseScenario):
 
         decision, feedback = self.extract_verifier_decision(v_response)
 
-        # If incomplete and not at turn limit, request more evidence
-        if decision == "INCOMPLETE" and current_turn < self.max_turns - 1:
+        # If incomplete/rejected and not at turn limit, request more evidence.
+        # NOTE: the upstream prompt says "PASS or REJECT" but the code only
+        # checked "INCOMPLETE", silently accepting REJECT (diagnosis wrong /
+        # unacceptable) as PASS. Treat both as "not acceptable" and re-gather.
+        if decision in ("INCOMPLETE", "REJECT") and current_turn < self.max_turns - 1:
             # Doctor receives feedback and gathers more evidence
             fb_instruction = self.prompts.get_doctor_feedback_instruction(feedback)
             fb_response = doctor.step(fb_instruction)

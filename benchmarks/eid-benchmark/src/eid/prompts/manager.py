@@ -608,7 +608,7 @@ class PromptManager:
             "You will receive a case summary, a diagnostician's full output (evidence statements, "
             "gaps, diagnosis), and optionally a previous diagnosis.\n"
             "\n"
-            "Perform THREE checks and output STRICT JSON (no prose outside the JSON):\n"
+            "Perform FOUR checks and output STRICT JSON (no prose outside the JSON):\n"
             "\n"
             "1. CLAIM CHECK: for each evidence statement the diagnostician cited, set verdict to one of:\n"
             "   - SUPPORTED: the statement matches information present in the summary;\n"
@@ -628,10 +628,16 @@ class PromptManager:
             "counter-evidence against that diagnosis plus ONE alternative diagnosis not yet excluded. "
             "Otherwise triggered=false with empty strings.\n"
             "\n"
+            "4. DECISIVENESS: set decisive=false ONLY if the current diagnosis is NOT yet decisive "
+            "(i.e. one or more discriminating facts could still change the diagnosis). If the diagnosis "
+            "is already decisive given the available evidence, set decisive=true AND return an empty "
+            "gaps list (do NOT list trivial/staging gaps).\n"
+            "\n"
             "Output exactly this JSON shape:\n"
             '{"claim_checks": [{"statement": str, "verdict": "SUPPORTED|CONTRADICTED|HALLUCINATED|UNDETERMINED"}], '
             '"gaps": [{"info": str, "discriminates": str}], '
-            '"refutation": {"triggered": bool, "counter_evidence": str, "alternative": str}}'
+            '"refutation": {"triggered": bool, "counter_evidence": str, "alternative": str}, '
+            '"decisive": bool}'
         )
 
     def get_verifier_cv_user_prompt(
