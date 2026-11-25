@@ -5,6 +5,37 @@ This module manages all prompt templates used in the evaluation scenarios.
 
 from __future__ import annotations
 
+import json
+import os
+
+# P1 措辞对齐（医生查表）：环境变量指向规范检查目录 JSON（data/exam_catalog.json）。
+# 设置后，doctor prompt 会附上「可查检查目录」，要求医生用目录里的规范检查名发 [TEST]。
+# 空则不加（保持其他场景不变）。
+DOCTOR_EXAM_CATALOG = os.getenv("DOCTOR_EXAM_CATALOG", "")
+
+
+def _load_exam_catalog_text() -> str:
+    """把规范检查目录（exam_catalog.json）转成医生可读的「可查检查清单」文本。"""
+    if not DOCTOR_EXAM_CATALOG:
+        return ""
+    try:
+        with open(DOCTOR_EXAM_CATALOG) as fh:
+            data = json.load(fh)
+    except Exception:
+        return ""
+    items = data.get("items", [])
+    if not items:
+        return ""
+    cats = {}
+    for it in items:
+        cats.setdefault(it.get("category", "other"), []).append(it.get("name", ""))
+    lines = []
+    for cat, names in cats.items():
+        lines.append(f"[{cat}]")
+        lines.extend(names)
+    return "\n".join(lines)
+
+
 # Dataset categories
 DIFFERENTIAL_DATASETS = {"diagnosisarena", "clinicalbench", "rarearena", "rarearena_rdc"}
 FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
@@ -228,6 +259,18 @@ class PromptManager:
 
     def get_sc_doctor_system_prompt(self) -> str:
         """Get system prompt for SC mode doctor (evidence gatherer)."""
+        catalog_text = _load_exam_catalog_text()
+        if catalog_text:
+            catalog_block = (
+                "\n"
+                "Test Catalog — this virtual hospital can perform the following tests. "
+                "When you issue a [TEST] command, write ONLY the exact test name itself. "
+                "The category tags below (vital_signs, laboratory, imaging, physical_exam, ...) "
+                "are only grouping labels and are NOT part of any test name:\n"
+                f"{catalog_text}\n"
+            )
+        else:
+            catalog_block = ""
         return (
             "You are a licensed physician conducting a medical consultation.\n"
             f"{self.task_description}\n"
@@ -244,6 +287,7 @@ class PromptManager:
             "'Not available in this clinical environment', do NOT repeat it or keep requesting "
             "similar unavailable tests. Instead, request one of the tests listed under "
             "'Available tests:' in the Analyst's reply.\n"
+            f"{catalog_block}"
             "\n"
             "In every turn, follow a strict 'Reasoning-then-Acting' process:\n"
             "\n"
