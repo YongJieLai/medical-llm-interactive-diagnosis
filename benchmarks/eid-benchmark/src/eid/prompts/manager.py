@@ -5,6 +5,37 @@ This module manages all prompt templates used in the evaluation scenarios.
 
 from __future__ import annotations
 
+import json
+import os
+
+# P1 措辞对齐（医生查表）：环境变量指向规范检查目录 JSON（data/exam_catalog.json）。
+# 设置后，doctor prompt 会附上「可查检查目录」，要求医生用目录里的规范检查名发 [TEST]。
+# 空则不加（保持其他场景不变）。
+DOCTOR_EXAM_CATALOG = os.getenv("DOCTOR_EXAM_CATALOG", "")
+
+
+def _load_exam_catalog_text() -> str:
+    """把规范检查目录（exam_catalog.json）转成医生可读的「可查检查清单」文本。"""
+    if not DOCTOR_EXAM_CATALOG:
+        return ""
+    try:
+        with open(DOCTOR_EXAM_CATALOG) as fh:
+            data = json.load(fh)
+    except Exception:
+        return ""
+    items = data.get("items", [])
+    if not items:
+        return ""
+    cats = {}
+    for it in items:
+        cats.setdefault(it.get("category", "other"), []).append(it.get("name", ""))
+    lines = []
+    for cat, names in cats.items():
+        lines.append(f"[{cat}]")
+        lines.extend(names)
+    return "\n".join(lines)
+
+
 # Dataset categories
 DIFFERENTIAL_DATASETS = {"diagnosisarena", "clinicalbench", "rarearena", "rarearena_rdc"}
 FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
@@ -21,7 +52,12 @@ FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
 #     语义匹配护栏不足以阻止假阴性，方案 A 被否决。
 #   - 下一步采用 "availability"（方案 B）：查不到时既不误返 Normal（避免假阴性），
 #     也不卡死为 Not specified（避免 71% 假失败），而是告诉医生"此检查不可用 + 哪些检查可请求"。
-REPORTER_MODE = "availability"
+#
+#   ⚠️ 但方案 B 被用户否决（泄露检查空间：目录逐题变化、泄露"这题在测哪类病"）。
+#   最终方案（2026-11-25）：离线补全完整检查面板（data/exam_panels + build_panel_dataset.py），
+#   从根上消除"查不到"——面板补全后"查得到"成为常态，故 reporter 口径回到 closed-world：
+#   查不到（真正冷门检查）才返回 'Not specified'，此时是诚实信号而非假失败。
+REPORTER_MODE = "closed"
 
 # Task descriptions
 TASKS = {
@@ -223,6 +259,18 @@ class PromptManager:
 
     def get_sc_doctor_system_prompt(self) -> str:
         """Get system prompt for SC mode doctor (evidence gatherer)."""
+        catalog_text = _load_exam_catalog_text()
+        if catalog_text:
+            catalog_block = (
+                "\n"
+                "Test Catalog — this virtual hospital can perform the following tests. "
+                "When you issue a [TEST] command, write ONLY the exact test name itself. "
+                "The category tags below (vital_signs, laboratory, imaging, physical_exam, ...) "
+                "are only grouping labels and are NOT part of any test name:\n"
+                f"{catalog_text}\n"
+            )
+        else:
+            catalog_block = ""
         return (
             "You are a licensed physician conducting a medical consultation.\n"
             f"{self.task_description}\n"
@@ -239,6 +287,7 @@ class PromptManager:
             "'Not available in this clinical environment', do NOT repeat it or keep requesting "
             "similar unavailable tests. Instead, request one of the tests listed under "
             "'Available tests:' in the Analyst's reply.\n"
+            f"{catalog_block}"
             "\n"
             "In every turn, follow a strict 'Reasoning-then-Acting' process:\n"
             "\n"
