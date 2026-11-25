@@ -21,7 +21,12 @@ FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
 #     语义匹配护栏不足以阻止假阴性，方案 A 被否决。
 #   - 下一步采用 "availability"（方案 B）：查不到时既不误返 Normal（避免假阴性），
 #     也不卡死为 Not specified（避免 71% 假失败），而是告诉医生"此检查不可用 + 哪些检查可请求"。
-REPORTER_MODE = "availability"
+#
+#   ⚠️ 但方案 B 被用户否决（泄露检查空间：目录逐题变化、泄露"这题在测哪类病"）。
+#   最终方案（2026-11-25）：离线补全完整检查面板（data/exam_panels + build_panel_dataset.py），
+#   从根上消除"查不到"——面板补全后"查得到"成为常态，故 reporter 口径回到 closed-world：
+#   查不到（真正冷门检查）才返回 'Not specified'，此时是诚实信号而非假失败。
+REPORTER_MODE = "closed"
 
 # Task descriptions
 TASKS = {

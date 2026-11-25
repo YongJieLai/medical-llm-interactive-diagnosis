@@ -68,9 +68,10 @@ def main():
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--start", type=int, default=0, help="起始病例下标（含）")
     ap.add_argument("--end", type=int, default=30, help="结束病例下标（不含）")
+    ap.add_argument("--dataset-path", default=None, help="自定义数据集 jsonl 路径（默认用 medqa 默认路径）")
     args = ap.parse_args()
 
-    dataset = load_dataset("medqa")
+    dataset = load_dataset("medqa", path=args.dataset_path)
     items = list(dataset)[args.start:args.end]
     sub = Dataset(items=items, name="medqa")
     print(f"[{args.mode}] 将跑 {len(sub)} 例 (doctor={args.doctor}, range={args.start}:{args.end})", flush=True)
