@@ -46,10 +46,12 @@ from eid.datasets import load_dataset  # noqa: E402
 from eid.scenarios.base import CaseInput  # noqa: E402
 from eid.scenarios.refine_cv_ablations import RefineCVQwenGapRefuteRAGScenario  # noqa: E402
 from eid.scenarios.refine_cv_emptyddx import RefineCVQwenGapRefuteEmptyDDXScenario  # noqa: E402
+from eid.scenarios.refine_cv_doctorddx import RefineCVQwenGapRefuteDoctorDDXScenario  # noqa: E402
 
 METHODS = {
     "rag": ("refine_cv_qwen_gap_refute_rag", RefineCVQwenGapRefuteRAGScenario),
     "emptyddx": ("refine_cv_qwen_gap_refute_emptyddx", RefineCVQwenGapRefuteEmptyDDXScenario),
+    "doctorddx": ("refine_cv_qwen_gap_refute_doctorddx", RefineCVQwenGapRefuteDoctorDDXScenario),
 }
 
 

@@ -233,6 +233,27 @@ class RefineCVScenario(BaseScenario):
             f"{snippet}"
         )
 
+    # ------------------------------------------------------------------ #
+    # Doctor-side hooks (P3: evidence-gathering augmentation)
+    # ------------------------------------------------------------------ #
+    def _decorate_doctor_instruction(self, instruction: str) -> str:
+        """Hook: let subclasses augment the doctor's per-turn instruction.
+
+        Default is a no-op pass-through. Subclasses (e.g. DDx-driven history
+        taking) override this to inject a differential-diagnosis gathering plan.
+        """
+        return instruction
+
+    def _after_dialogue_turn(
+        self, current_turn: int, dialogue_history: str, last_reply: str
+    ) -> None:
+        """Hook: called after each doctor-patient/reporter exchange.
+
+        Default is a no-op. Subclasses override this to, e.g., generate a
+        differential-diagnosis gathering plan once the chief complaint is known.
+        """
+        return None
+
     def _verify(
         self,
         summary: str,
@@ -366,10 +387,12 @@ class RefineCVScenario(BaseScenario):
         gather_count = 0  # P0-3: cap GATHER rounds to prevent dead-loop over-questioning
 
         while current_turn <= self.max_turns:
-            instruction = self.prompts.get_doctor_turn_instruction(
-                current_turns=current_turn,
-                max_turns=self.max_turns,
-                last_reply=last_reply,
+            instruction = self._decorate_doctor_instruction(
+                self.prompts.get_doctor_turn_instruction(
+                    current_turns=current_turn,
+                    max_turns=self.max_turns,
+                    last_reply=last_reply,
+                )
             )
             doctor_response = doctor.step(instruction)
             trace.append({
@@ -429,6 +452,10 @@ class RefineCVScenario(BaseScenario):
                 })
                 last_reply = self.extract_patient_response(p_response)
                 dialogue_history += f"\nPatient: {last_reply}\n"
+
+            # P3 hook: let subclasses react to the completed exchange (e.g. generate
+            # a differential-diagnosis gathering plan once the chief complaint is known).
+            self._after_dialogue_turn(current_turn, dialogue_history, last_reply)
 
         role_records = self._collect_role_records([
             ("doctor", doctor),
