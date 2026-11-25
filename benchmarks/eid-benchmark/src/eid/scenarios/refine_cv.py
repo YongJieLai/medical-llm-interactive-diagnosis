@@ -168,6 +168,21 @@ class RefineCVScenario(BaseScenario):
             lines.append("Common pitfalls: " + "; ".join(str(x) for x in pit))
         return "\n".join(lines)
 
+    def _rag_inject(self, snippet: str) -> str:
+        """Return the prompt text that injects the retrieved knowledge snippet.
+
+        Oracle-KB default frames the snippet as a differential-diagnosis list the
+        verifier should choose an alternative from. Subclasses (e.g. the PrimeKG
+        phenotype grounding) override this to frame it as counter-evidence checks.
+        """
+        return (
+            "\n\n### External Differential-Diagnosis Knowledge (authoritative) ###\n"
+            "Use the following knowledge to propose a clinically VALID alternative "
+            "diagnosis and counter-evidence. Do NOT invent alternatives outside this "
+            "list unless none is relevant.\n"
+            f"{snippet}"
+        )
+
     def _verify(
         self,
         summary: str,
@@ -181,17 +196,11 @@ class RefineCVScenario(BaseScenario):
             summary, diagnostician_output, prev_diagnosis
         )
         if self.ENABLE_RAG:
-            # Ground the verifier's refutation in external DDX knowledge for the
+            # Ground the verifier's refutation in external knowledge for the
             # current candidate diagnosis. This is the P2 knowledge-injection point.
             ddx_snippet = self._retrieve_ddx(current_diagnosis or prev_diagnosis or "")
             if ddx_snippet:
-                user_prompt += (
-                    "\n\n### External Differential-Diagnosis Knowledge (authoritative) ###\n"
-                    "Use the following knowledge to propose a clinically VALID alternative "
-                    "diagnosis and counter-evidence. Do NOT invent alternatives outside this "
-                    "list unless none is relevant.\n"
-                    f"{ddx_snippet}"
-                )
+                user_prompt += self._rag_inject(ddx_snippet)
         try:
             resp = _llm_chat(
                 self._ds_client,
