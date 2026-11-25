@@ -9,17 +9,19 @@ from __future__ import annotations
 DIFFERENTIAL_DATASETS = {"diagnosisarena", "clinicalbench", "rarearena", "rarearena_rdc"}
 FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
 
-# P0: reporter "查不到检查" 的判定口径开关。
-# True  = open-world（对齐上游 AgentClinic / EID-Benchmark）：查不到 → 语义匹配→否则返回 Normal/阴性。
-# False = closed-world（fork 旧口径）：查不到 → 返回 'Not specified'。
+# P0: reporter "查不到检查" 的判定口径。三态：
+#   "closed"       : 查不到 → 'Not specified'（fork 旧口径）。
+#   "open"         : 查不到 → 语义匹配→否则 Normal/阴性（对齐上游，方案 A）。
+#   "availability" : 查不到 → 'Not available' + 可请求检查目录（方案 B，EGIP 式）。
 #
 # ⚠️ 验证结论（2026-11-25，refine_cv_qwen 60 例，确定性 judge）：
-#   open-world 在 60 例上 53.3% → 40.0%（-13.3pp），改坏 16 例 vs 修好 8 例。
-#   主因是"假阴性"：医生问对检查但措辞与事实表 key 不一致 → 误返 Normal → 医生错误排除真病
-#   （例：medqa_2 Hirschsprung→中耳炎、medqa_24 Meigs→SLE、medqa_29 播散性淋球菌→功能性腕痛）。
-#   语义匹配护栏不足以阻止假阴性。故默认保持 closed-world；下一步应做方案 B
-#   （EGIP 式 availability 元数据：查不到→返回"不可用 + 可请求检查目录"，而非 Normal/Not specified）。
-REPORTER_OPEN_WORLD = False
+#   - "open"（方案 A）53.3% → 40.0%（-13.3pp），改坏 16 vs 修好 8。主因假阴性：
+#     医生问对检查但措辞与事实表 key 不一致 → 误返 Normal → 错误排除真病
+#     （medqa_2 Hirschsprung→中耳炎、medqa_24 Meigs→SLE、medqa_29 播散性淋球菌→功能性腕痛）。
+#     语义匹配护栏不足以阻止假阴性，方案 A 被否决。
+#   - 下一步采用 "availability"（方案 B）：查不到时既不误返 Normal（避免假阴性），
+#     也不卡死为 Not specified（避免 71% 假失败），而是告诉医生"此检查不可用 + 哪些检查可请求"。
+REPORTER_MODE = "availability"
 
 # Task descriptions
 TASKS = {
@@ -105,9 +107,8 @@ class PromptManager:
 
     def get_reporter_system_prompt(self) -> str:
         """Get system prompt for reporter simulator."""
-        if REPORTER_OPEN_WORLD:
-            # open-world：查不到 → 先做语义匹配（防假阴性），真无关才返回 Normal/阴性。
-            # 这消除 closed-world 口径下"合理排除性检查被卡死为 Not specified"的 71% 假失败。
+        if REPORTER_MODE == "open":
+            # open-world（方案 A）：查不到 → 先语义匹配（防假阴性），真无关才返回 Normal/阴性。
             missing_protocol = (
                 "3. If the requested test results are not found VERBATIM in the list, first "
                 "check whether the request is SEMANTICALLY the same test as any listed fact "
@@ -118,7 +119,24 @@ class PromptManager:
                 "test would have been performed and returned a normal/negative "
                 "(non-significant) result.\n"
             )
+        elif REPORTER_MODE == "availability":
+            # 方案 B（EGIP 式）：查不到 → 返回"不可用 + 可请求检查目录"，既不误返 Normal（假阴性），
+            # 也不卡死为 Not specified（假失败），让医生知道该转向哪些可用检查。
+            missing_protocol = (
+                "3. If the requested test results are not found VERBATIM in the list, first "
+                "check whether the request is SEMANTICALLY the same test as any listed fact "
+                "(a synonym, abbreviation, or alternative phrasing of the same test). If it is "
+                "the same test, return that fact verbatim with its index.\n"
+                "4. If the request is a DIFFERENT test that is truly absent from the list, "
+                "respond exactly: 'Not available in this clinical environment.' Then, on a new "
+                "line, output 'Available tests:' followed by a short list of the test/exam "
+                "CATEGORIES that ARE present in the provided fact list (infer them from the fact "
+                "indices, e.g. imaging, blood tests, biopsy). This tells the physician which "
+                "alternative tests they can actually request. NEVER report a missing result as "
+                "'Normal' or 'Negative'.\n"
+            )
         else:
+            # closed-world（fork 旧口径）：查不到 → Not specified。
             missing_protocol = (
                 "3. If the requested test results are not found in the list, you MUST return "
                 "'Not specified' — there is NO data available for this test. NEVER report a "
@@ -217,6 +235,10 @@ class PromptManager:
             "2. Turn Limit: You strictly cannot exceed {max_turns} total turns.\n"
             "3. No Repetition: Never ask a question or request a test that has already been covered.\n"
             "4. Atomic Inquiries: Each question must address a single, specific topic.\n"
+            "5. Test Availability: If the Medical Analyst replies that a requested test is "
+            "'Not available in this clinical environment', do NOT repeat it or keep requesting "
+            "similar unavailable tests. Instead, request one of the tests listed under "
+            "'Available tests:' in the Analyst's reply.\n"
             "\n"
             "In every turn, follow a strict 'Reasoning-then-Acting' process:\n"
             "\n"
