@@ -17,6 +17,7 @@ from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
 from eid.scenarios.refine_ht import RefineHTScenario
 from eid.scenarios.refine_cv_primekg import RefineCVQwenGapRefutePrimeKGScenario
 from eid.scenarios.refine_cv_runtimeddx import RefineCVQwenGapRefuteLLMDDXScenario
+from eid.scenarios.refine_cv_emptyddx import RefineCVQwenGapRefuteEmptyDDXScenario
 from eid.scenarios.refine_cv_ablations import (
     RefineCVQwenCheckOnlyScenario,
     RefineCVQwenGapOnlyScenario,
@@ -53,6 +54,7 @@ __all__ = [
     "RefineCVQwenGapRefuteRAGScenario",
     "RefineCVQwenGapRefutePrimeKGScenario",
     "RefineCVQwenGapRefuteLLMDDXScenario",
+    "RefineCVQwenGapRefuteEmptyDDXScenario",
     "RefineCVQwenRAGScenario",
     "RefineCVQwenRefuteOnlyRAGScenario",
     "RefineCVQwenMaxScenario",
@@ -121,6 +123,7 @@ def get_scenario(
         "clinicalagents": ClinicalAgentsScenario,
         "refine_cv_qwen_gap_refute_primekg": RefineCVQwenGapRefutePrimeKGScenario,
         "refine_cv_qwen_gap_refute_llmddx": RefineCVQwenGapRefuteLLMDDXScenario,
+        "refine_cv_qwen_gap_refute_emptyddx": RefineCVQwenGapRefuteEmptyDDXScenario,
     }
 
     if mode not in scenarios:
@@ -211,6 +214,7 @@ def get_scenario(
         "refine_cv_qwen_gap_refute_rag",
         "refine_cv_qwen_gap_refute_primekg",
         "refine_cv_qwen_gap_refute_llmddx",
+        "refine_cv_qwen_gap_refute_emptyddx",
         "refine_cv_qwenmax",
         "refine_cv_glm",
     ):
