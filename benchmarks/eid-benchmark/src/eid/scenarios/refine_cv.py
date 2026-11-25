@@ -40,6 +40,16 @@ except ImportError:  # pragma: no cover - path fallback
     sys.path.insert(0, "/workspace/medical_llm_exp/src")
     from llm_client import get_llm, chat as _llm_chat
 
+# P1 措辞对齐（reporter 端归一化）：医生自由词 → 规范检查名。仅在环境变量
+# EXAM_CATALOG 指向 exam_catalog.json 时启用；医生端保持无目录（不注入 catalog）。
+try:
+    from exam_normalize import ExamNormalizer
+except ImportError:  # pragma: no cover - path fallback
+    import sys
+
+    sys.path.insert(0, "/workspace/medical_llm_exp/src")
+    from exam_normalize import ExamNormalizer
+
 # Verdicts that mean the diagnosis is NOT trustworthy (evidence is broken).
 _BAD_VERDICTS = {"CONTRADICTED", "HALLUCINATED", "UNDETERMINED"}
 
@@ -100,6 +110,14 @@ class RefineCVScenario(BaseScenario):
         if self.VERIFIER_MODEL:
             self._ds_model = self.VERIFIER_MODEL
         self._ddx_kb: dict | None = None  # lazily loaded external DDX knowledge
+        # P1 reporter 端归一化器：医生自由词 -> 规范检查名（EXAM_CATALOG 环境变量开启）
+        self._exam_normalizer = ExamNormalizer.from_env()
+
+    def _normalize_test_request(self, test_name: str) -> str:
+        """把医生的 [TEST] 自由词翻译为规范检查名（未开启/未命中则原样返回）。"""
+        if self._exam_normalizer is None:
+            return test_name
+        return self._exam_normalizer.normalize(test_name)
 
     # ------------------------------------------------------------------ #
     # Verification helpers
@@ -353,12 +371,15 @@ class RefineCVScenario(BaseScenario):
             current_turn += 1
 
             if action_type == "test":
-                m_instruction = self.prompts.get_reporter_turn_instruction(action_content)
+                normalized = self._normalize_test_request(action_content)
+                m_instruction = self.prompts.get_reporter_turn_instruction(normalized)
                 m_response = reporter.step(m_instruction)
                 trace.append({
                     "role_id": "reporter",
                     "content": m_response,
                     "duration": reporter.get_last_duration(),
+                    "request": action_content,
+                    "request_normalized": normalized,
                 })
                 last_reply = m_response
                 dialogue_history += f"\nMeasurement: {m_response}\n"
@@ -530,12 +551,15 @@ class RefineCVScenario(BaseScenario):
         })
         action_type, action_content = self.extract_action(fb_response)
         if action_type == "test":
-            m_instruction = self.prompts.get_reporter_turn_instruction(action_content)
+            normalized = self._normalize_test_request(action_content)
+            m_instruction = self.prompts.get_reporter_turn_instruction(normalized)
             m_response = reporter.step(m_instruction)
             trace.append({
                 "role_id": "reporter",
                 "content": m_response,
                 "duration": reporter.get_last_duration(),
+                "request": action_content,
+                "request_normalized": normalized,
             })
         else:
             p_instruction = self.prompts.get_patient_turn_instruction(action_content)
