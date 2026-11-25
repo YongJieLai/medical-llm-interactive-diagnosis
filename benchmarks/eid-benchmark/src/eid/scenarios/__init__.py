@@ -14,6 +14,7 @@ from eid.scenarios.refine_hpr import RefineHPRScenario
 from eid.scenarios.refine_eg import RefineEGScenario
 from eid.scenarios.refine_cv import RefineCVScenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
+from eid.scenarios.refine_ht import RefineHTScenario
 from eid.scenarios.refine_cv_ablations import (
     RefineCVQwenCheckOnlyScenario,
     RefineCVQwenGapOnlyScenario,
@@ -42,6 +43,7 @@ __all__ = [
     "RefineEGScenario",
     "RefineCVScenario",
     "RefineCVQwenScenario",
+    "RefineHTScenario",
     "RefineCVQwenCheckOnlyScenario",
     "RefineCVQwenGapOnlyScenario",
     "RefineCVQwenRefuteOnlyScenario",
@@ -99,6 +101,7 @@ def get_scenario(
         "refine_eg": RefineEGScenario,
         "refine_cv": RefineCVScenario,
         "refine_cv_qwen": RefineCVQwenScenario,
+        "refine_ht": RefineHTScenario,
         "refine_cv_qwen_check": RefineCVQwenCheckOnlyScenario,
         "refine_cv_qwen_gap": RefineCVQwenGapOnlyScenario,
         "refine_cv_qwen_refute": RefineCVQwenRefuteOnlyScenario,
@@ -183,7 +186,7 @@ def get_scenario(
             diagnostician_config=diagnostician_config,
             verifier_config=verifier_config,
         )
-    elif mode == "refine_cv_qwen":
+    elif mode in ("refine_cv_qwen", "refine_ht"):
         return scenario_class(
             dataset_name=dataset_name,
             doctor_config=doctor_config,
