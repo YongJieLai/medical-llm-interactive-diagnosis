@@ -9,6 +9,18 @@ from __future__ import annotations
 DIFFERENTIAL_DATASETS = {"diagnosisarena", "clinicalbench", "rarearena", "rarearena_rdc"}
 FINAL_DATASETS = {"medqa", "derm", "nejm", "agentclinic_medqa"}
 
+# P0: reporter "查不到检查" 的判定口径开关。
+# True  = open-world（对齐上游 AgentClinic / EID-Benchmark）：查不到 → 语义匹配→否则返回 Normal/阴性。
+# False = closed-world（fork 旧口径）：查不到 → 返回 'Not specified'。
+#
+# ⚠️ 验证结论（2026-11-25，refine_cv_qwen 60 例，确定性 judge）：
+#   open-world 在 60 例上 53.3% → 40.0%（-13.3pp），改坏 16 例 vs 修好 8 例。
+#   主因是"假阴性"：医生问对检查但措辞与事实表 key 不一致 → 误返 Normal → 医生错误排除真病
+#   （例：medqa_2 Hirschsprung→中耳炎、medqa_24 Meigs→SLE、medqa_29 播散性淋球菌→功能性腕痛）。
+#   语义匹配护栏不足以阻止假阴性。故默认保持 closed-world；下一步应做方案 B
+#   （EGIP 式 availability 元数据：查不到→返回"不可用 + 可请求检查目录"，而非 Normal/Not specified）。
+REPORTER_OPEN_WORLD = False
+
 # Task descriptions
 TASKS = {
     "diagnosis": {
@@ -93,6 +105,26 @@ class PromptManager:
 
     def get_reporter_system_prompt(self) -> str:
         """Get system prompt for reporter simulator."""
+        if REPORTER_OPEN_WORLD:
+            # open-world：查不到 → 先做语义匹配（防假阴性），真无关才返回 Normal/阴性。
+            # 这消除 closed-world 口径下"合理排除性检查被卡死为 Not specified"的 71% 假失败。
+            missing_protocol = (
+                "3. If the requested test results are not found VERBATIM in the list, first "
+                "check whether the request is SEMANTICALLY the same test as any listed fact "
+                "(a synonym, abbreviation, or alternative phrasing of the same test). If it is "
+                "the same test, return that fact verbatim with its index.\n"
+                "4. If the request is a DIFFERENT test that is truly absent from the list, "
+                "respond 'Normal' or 'Negative' — in a real clinical environment this exclusion "
+                "test would have been performed and returned a normal/negative "
+                "(non-significant) result.\n"
+            )
+        else:
+            missing_protocol = (
+                "3. If the requested test results are not found in the list, you MUST return "
+                "'Not specified' — there is NO data available for this test. NEVER report a "
+                "missing result as 'Normal' or as a negative finding. Only report 'Normal' "
+                "when the list EXPLICITLY states a normal/negative result for that test.\n"
+            )
         return (
             "You are a specialized module named 'Measurement' responsible for reporting "
             "test results to the physician.\n"
@@ -103,10 +135,7 @@ class PromptManager:
             "Response Protocols:\n"
             "1. Search the provided list for ALL facts that are relevant to the doctor's specific test request. Do not provide information that was not explicitly requested.\n"
             "2. Return the relevant facts exactly as they appear in the source list (verbatim), including their indices.\n"
-            "3. If the requested test results are not found in the list, you MUST return "
-            "'Not specified' — there is NO data available for this test. NEVER report a "
-            "missing result as 'Normal' or as a negative finding. Only report 'Normal' "
-            "when the list EXPLICITLY states a normal/negative result for that test.\n"
+            + missing_protocol
         )
 
     # =========================================================================

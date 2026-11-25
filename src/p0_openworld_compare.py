@@ -1,0 +1,150 @@
+"""P0 open-world reporter 口径修复 · 验证对比脚本。
+
+对比（同为 qwen-plus、10_turns、60 例、确定性 rule_judge 口径，None 算错）：
+- refine_cv_qwen           : closed-world 基线（查不到→Not specified）
+- refine_cv_qwen_openworld : open-world 修复（查不到→语义匹配→Normal）
+
+额外统计：
+1) reporter 返回中 'Not specified' / 'Normal' 的出现次数（验证口径确实切换）；
+2) 逐例 diff（修好/改坏），重点看假阴性（open-world 把对的改成错）；
+3) McNemar 成对检验。
+"""
+import json
+import sys
+from pathlib import Path
+from math import sqrt, erfc
+
+sys.path.insert(0, "/workspace/medical_llm_exp/src")
+from deterministic_judge import rule_judge
+
+BASE = Path("/workspace/medical_llm_exp/benchmarks/eid-benchmark/results/medqa")
+
+
+def load(rel: str) -> dict:
+    record_dir = BASE / rel / "record"
+    out = {}
+    if not record_dir.is_dir():
+        return out
+    for fn in sorted(record_dir.iterdir()):
+        if fn.suffix != ".json":
+            continue
+        try:
+            r = json.loads(fn.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        if "case_id" not in r:
+            continue
+        out[r["case_id"]] = {
+            "pred": (r.get("prediction") or "").strip(),
+            "truth": (r.get("ground_truth") or "").strip(),
+            "raw": r,
+        }
+    return out
+
+
+def is_correct(v) -> bool:
+    return rule_judge(v["pred"], v["truth"]) is True
+
+
+def case_idx(case_id: str) -> int:
+    return int(case_id.rsplit("_", 1)[-1])
+
+
+def count_marker(raw, marker: str) -> int:
+    """统计 record 全文（含 trace）里 marker 出现次数。"""
+    s = json.dumps(raw, ensure_ascii=False)
+    return s.count(marker)
+
+
+def mcnemar(a_correct, b_correct, shared_ids):
+    b = c = 0
+    for cid in shared_ids:
+        a, bv = a_correct[cid], b_correct[cid]
+        if a and not bv:
+            b += 1
+        elif not a and bv:
+            c += 1
+    if b + c == 0:
+        return b, c, 0.0, 1.0
+    chi2 = (abs(b - c) - 1) ** 2 / (b + c)
+    p = erfc(sqrt(chi2 / 2))
+    return b, c, chi2, p
+
+
+def main():
+    methods = {
+        "closed-world(基线)": "refine_cv_qwen/qwen-plus/10_turns",
+        "open-world(修复)": "refine_cv_qwen_openworld/qwen-plus/10_turns",
+    }
+    rows = {k: load(v) for k, v in methods.items()}
+    correct = {k: {cid: is_correct(x) for cid, x in v.items()} for k, v in rows.items()}
+
+    print("=" * 84)
+    print("P0 open-world reporter 口径修复 · 60 例最终准确率（确定性 rule_judge）")
+    print("=" * 84)
+    print(f"{'方法':24s} {'总数':>4s} {'正确':>4s} {'准确率':>8s}")
+    print("-" * 84)
+    for k in methods:
+        n = len(rows[k])
+        t = sum(correct[k].values())
+        print(f"{k:24s} {n:>4d} {t:>4d} {t/n*100:>7.1f}%")
+
+    print("\n分段对比：id 0–29（旧）vs id 30–59（新）")
+    print("-" * 84)
+    for k in methods:
+        old = {c: v for c, v in correct[k].items() if case_idx(c) < 30}
+        new = {c: v for c, v in correct[k].items() if case_idx(c) >= 30}
+        print(f"{k:24s} 旧30例 {sum(old.values()):>2d}/{len(old)} "
+              f"({sum(old.values())/len(old)*100:>5.1f}%)   "
+              f"新30例 {sum(new.values()):>2d}/{len(new)} "
+              f"({sum(new.values())/len(new)*100:>5.1f}%)")
+
+    print("\nreporter 口径切换验证（record 全文标记计数）")
+    print("-" * 84)
+    for k in methods:
+        ns = sum(count_marker(v["raw"], "Not specified") for v in rows[k].values())
+        nrm = sum(count_marker(v["raw"], "Normal") for v in rows[k].values())
+        print(f"{k:24s} 'Not specified'={ns:>4d} 次   'Normal'={nrm:>4d} 次")
+
+    print("\n逐例 diff：closed-world → open-world")
+    print("-" * 84)
+    a_rows, b_rows = rows["closed-world(基线)"], rows["open-world(修复)"]
+    a_c, b_c = correct["closed-world(基线)"], correct["open-world(修复)"]
+    shared = sorted(set(a_rows) & set(b_rows), key=case_idx)
+    fixed, regressed = [], []
+    for cid in shared:
+        ca, cb = a_c[cid], b_c[cid]
+        if not ca and cb:
+            fixed.append(cid)
+        elif ca and not cb:
+            regressed.append(cid)
+    print(f"  修好 {len(fixed)} 例 / 改坏 {len(regressed)} 例（改坏=潜在假阴性）")
+    if fixed:
+        print("  ✅ 修好（错→对）:")
+        for cid in fixed:
+            print(f"     {cid}: truth={b_rows[cid]['truth']!r}")
+            print(f"            旧 pred={a_rows[cid]['pred'][:55]!r}")
+            print(f"            新 pred={b_rows[cid]['pred'][:55]!r}")
+    if regressed:
+        print("  ❌ 改坏（对→错，假阴性候选）:")
+        for cid in regressed:
+            print(f"     {cid}: truth={b_rows[cid]['truth']!r}")
+            print(f"            旧 pred={a_rows[cid]['pred'][:55]!r}")
+            print(f"            新 pred={b_rows[cid]['pred'][:55]!r}")
+
+    print("\nMcNemar 检验")
+    print("-" * 84)
+    bb, cc, chi2, p = mcnemar(a_c, b_c, shared)
+    sign = "显著" if p < 0.05 else "不显著"
+    print(f"  closed-world vs open-world: b={bb}(对→错) c={cc}(错→对) "
+          f"chi2={chi2:.2f}  p={p:.4f}  ({sign})")
+
+    print("\n结论摘要")
+    print("=" * 84)
+    a_t = sum(a_c.values())
+    b_t = sum(b_c.values())
+    print(f"closed-world: {a_t}/60 ({a_t/60*100:.1f}%) → open-world: {b_t}/60 ({b_t/60*100:.1f}%)  Δ={b_t-a_t:+d}")
+
+
+if __name__ == "__main__":
+    main()
