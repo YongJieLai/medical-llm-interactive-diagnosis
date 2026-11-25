@@ -50,6 +50,16 @@ except ImportError:  # pragma: no cover - path fallback
     sys.path.insert(0, "/workspace/medical_llm_exp/src")
     from exam_normalize import ExamNormalizer
 
+# P1 后续（SDBench 式）：reporter 查不到 → 合成"诊断中性"结果替代 Not specified。
+# 仅在环境变量 SYNTHESIZE_MISSING=1 时启用；缺省关闭保持 closed-world 口径可回退。
+try:
+    from exam_synthesize import Synthesizer
+except ImportError:  # pragma: no cover - path fallback
+    import sys
+
+    sys.path.insert(0, "/workspace/medical_llm_exp/src")
+    from exam_synthesize import Synthesizer
+
 # Verdicts that mean the diagnosis is NOT trustworthy (evidence is broken).
 _BAD_VERDICTS = {"CONTRADICTED", "HALLUCINATED", "UNDETERMINED"}
 
@@ -112,12 +122,34 @@ class RefineCVScenario(BaseScenario):
         self._ddx_kb: dict | None = None  # lazily loaded external DDX knowledge
         # P1 reporter 端归一化器：医生自由词 -> 规范检查名（EXAM_CATALOG 环境变量开启）
         self._exam_normalizer = ExamNormalizer.from_env()
+        # P1 后续（SDBench 式）：查不到 → 诊断中性合成（SYNTHESIZE_MISSING=1 开启）
+        self._synthesizer = Synthesizer.from_env()
+        # 病例上下文（run 时填充，供合成器使用；绝不包含 ground_truth）
+        self._patient_facts_str = ""
+        self._exam_facts_str = ""
 
     def _normalize_test_request(self, test_name: str) -> str:
         """把医生的 [TEST] 自由词翻译为规范检查名（未开启/未命中则原样返回）。"""
         if self._exam_normalizer is None:
             return test_name
         return self._exam_normalizer.normalize(test_name)
+
+    def _maybe_synthesize(self, m_response: str, test_name: str) -> tuple[str, bool]:
+        """closed-world 下 reporter 返回 'Not specified' 时，合成诊断中性结果替代。
+
+        返回 (content, synthetic_flag)。合成结果不标注 synthetic（医生不可见，
+        与 SDBench 一致），由 trace 里的 synthetic 标记（imputation ledger）兜底审计。
+        """
+        if self._synthesizer is None or not self._synthesizer.enabled:
+            return m_response, False
+        if not m_response or "Not specified" not in m_response:
+            return m_response, False
+        synth = self._synthesizer.synthesize(
+            test_name, self._patient_facts_str, self._exam_facts_str
+        )
+        if not synth:
+            return m_response, False
+        return synth, True
 
     # ------------------------------------------------------------------ #
     # Verification helpers
@@ -280,6 +312,8 @@ class RefineCVScenario(BaseScenario):
         """Execute REFINE-CV on a single case."""
         patient_facts_str = "\n".join(case_input.patient_facts)
         exam_facts_str = "\n".join(case_input.exam_facts)
+        self._patient_facts_str = patient_facts_str
+        self._exam_facts_str = exam_facts_str
 
         doctor = create_agent(
             role_id="doctor",
@@ -374,12 +408,14 @@ class RefineCVScenario(BaseScenario):
                 normalized = self._normalize_test_request(action_content)
                 m_instruction = self.prompts.get_reporter_turn_instruction(normalized)
                 m_response = reporter.step(m_instruction)
+                m_response, synthetic = self._maybe_synthesize(m_response, action_content)
                 trace.append({
                     "role_id": "reporter",
                     "content": m_response,
                     "duration": reporter.get_last_duration(),
                     "request": action_content,
                     "request_normalized": normalized,
+                    "synthetic": synthetic,
                 })
                 last_reply = m_response
                 dialogue_history += f"\nMeasurement: {m_response}\n"
@@ -410,6 +446,12 @@ class RefineCVScenario(BaseScenario):
                 "turns": current_turn,
                 "max_turns": self.max_turns,
                 "role_records": role_records,
+                # imputation ledger：记录哪些检查结果是合成的（供 Judge/分析审计）
+                "synthetic_findings": [
+                    {"request": e.get("request", ""), "content": e.get("content", "")}
+                    for e in trace
+                    if e.get("role_id") == "reporter" and e.get("synthetic")
+                ],
             },
         )
 
@@ -554,12 +596,14 @@ class RefineCVScenario(BaseScenario):
             normalized = self._normalize_test_request(action_content)
             m_instruction = self.prompts.get_reporter_turn_instruction(normalized)
             m_response = reporter.step(m_instruction)
+            m_response, synthetic = self._maybe_synthesize(m_response, action_content)
             trace.append({
                 "role_id": "reporter",
                 "content": m_response,
                 "duration": reporter.get_last_duration(),
                 "request": action_content,
                 "request_normalized": normalized,
+                "synthetic": synthetic,
             })
         else:
             p_instruction = self.prompts.get_patient_turn_instruction(action_content)
