@@ -13,12 +13,23 @@ from eid.scenarios.refine import RefineScenario
 from eid.scenarios.refine_hpr import RefineHPRScenario
 from eid.scenarios.refine_eg import RefineEGScenario
 from eid.scenarios.refine_cv import RefineCVScenario
+from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
+from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
 from eid.scenarios.refine_ht import RefineHTScenario
 from eid.scenarios.refine_cv_primekg import RefineCVQwenGapRefutePrimeKGScenario
 from eid.scenarios.refine_cv_runtimeddx import RefineCVQwenGapRefuteLLMDDXScenario
 from eid.scenarios.refine_cv_emptyddx import RefineCVQwenGapRefuteEmptyDDXScenario
 from eid.scenarios.refine_cv_doctorddx import RefineCVQwenGapRefuteDoctorDDXScenario
+from eid.scenarios.refine_cv_ddxdiag import (
+    RefineCVQwenGapRefuteDDXDiagScenario,
+    RefineCVQwenGapRefuteNeutralSummScenario,
+    RefineCVQwenGapRefuteJointScenario,
+)
+from eid.scenarios.refine_cv_llmddx_variants import (
+    RefineCVQwenGapRefuteLLMDDXNeutralSummScenario,
+    RefineCVQwenGapRefuteLLMDDXQwenGenScenario,
+)
 from eid.scenarios.refine_cv_ablations import (
     RefineCVQwenCheckOnlyScenario,
     RefineCVQwenGapOnlyScenario,
@@ -47,6 +58,9 @@ __all__ = [
     "RefineEGScenario",
     "RefineCVScenario",
     "RefineCVQwenScenario",
+    "ReactCVScenario",
+    "RoleplayCVScenario",
+    "ReactCV2Scenario",
     "RefineHTScenario",
     "RefineCVQwenCheckOnlyScenario",
     "RefineCVQwenGapOnlyScenario",
@@ -57,6 +71,11 @@ __all__ = [
     "RefineCVQwenGapRefuteLLMDDXScenario",
     "RefineCVQwenGapRefuteEmptyDDXScenario",
     "RefineCVQwenGapRefuteDoctorDDXScenario",
+    "RefineCVQwenGapRefuteDDXDiagScenario",
+    "RefineCVQwenGapRefuteNeutralSummScenario",
+    "RefineCVQwenGapRefuteJointScenario",
+    "RefineCVQwenGapRefuteLLMDDXNeutralSummScenario",
+    "RefineCVQwenGapRefuteLLMDDXQwenGenScenario",
     "RefineCVQwenRAGScenario",
     "RefineCVQwenRefuteOnlyRAGScenario",
     "RefineCVQwenMaxScenario",
@@ -109,6 +128,9 @@ def get_scenario(
         "refine_eg": RefineEGScenario,
         "refine_cv": RefineCVScenario,
         "refine_cv_qwen": RefineCVQwenScenario,
+        "react_cv": ReactCVScenario,
+        "react_cv2": ReactCV2Scenario,
+        "roleplay_cv": RoleplayCVScenario,
         "refine_ht": RefineHTScenario,
         "refine_cv_qwen_check": RefineCVQwenCheckOnlyScenario,
         "refine_cv_qwen_gap": RefineCVQwenGapOnlyScenario,
@@ -127,6 +149,11 @@ def get_scenario(
         "refine_cv_qwen_gap_refute_llmddx": RefineCVQwenGapRefuteLLMDDXScenario,
         "refine_cv_qwen_gap_refute_emptyddx": RefineCVQwenGapRefuteEmptyDDXScenario,
         "refine_cv_qwen_gap_refute_doctorddx": RefineCVQwenGapRefuteDoctorDDXScenario,
+        "refine_cv_qwen_gap_refute_ddxdiag": RefineCVQwenGapRefuteDDXDiagScenario,
+        "refine_cv_qwen_gap_refute_neutralsumm": RefineCVQwenGapRefuteNeutralSummScenario,
+        "refine_cv_qwen_gap_refute_joint": RefineCVQwenGapRefuteJointScenario,
+        "refine_cv_qwen_gap_refute_llmddx_neutralsumm": RefineCVQwenGapRefuteLLMDDXNeutralSummScenario,
+        "refine_cv_qwen_gap_refute_llmddx_qwengen": RefineCVQwenGapRefuteLLMDDXQwenGenScenario,
     }
 
     if mode not in scenarios:
@@ -187,7 +214,7 @@ def get_scenario(
             diagnostician_config=diagnostician_config,
             verifier_config=verifier_config,
         )
-    elif mode == "refine_cv":
+    elif mode in ("refine_cv", "react_cv", "react_cv2", "roleplay_cv"):
         return scenario_class(
             dataset_name=dataset_name,
             doctor_config=doctor_config,
@@ -219,6 +246,11 @@ def get_scenario(
         "refine_cv_qwen_gap_refute_llmddx",
         "refine_cv_qwen_gap_refute_emptyddx",
         "refine_cv_qwen_gap_refute_doctorddx",
+        "refine_cv_qwen_gap_refute_ddxdiag",
+        "refine_cv_qwen_gap_refute_neutralsumm",
+        "refine_cv_qwen_gap_refute_joint",
+        "refine_cv_qwen_gap_refute_llmddx_neutralsumm",
+        "refine_cv_qwen_gap_refute_llmddx_qwengen",
         "refine_cv_qwenmax",
         "refine_cv_glm",
     ):

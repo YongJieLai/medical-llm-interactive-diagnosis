@@ -1,0 +1,140 @@
+{
+  "case_id": "agentclinic_medqa_189",
+  "prediction": "Missed abortion",
+  "ground_truth": "Borderline personality disorder",
+  "trace": [
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] What are your current symptoms, and how long have they been present?",
+      "duration": 0.834418535232544
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 2. Abdominal pain and contractions  \n[RESPONSE] I’ve been having abdominal pain and contractions.",
+      "duration": 1.3329691886901855
+    },
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] Are you currently pregnant, and if so, what is your estimated gestational age?",
+      "duration": 0.8640115261077881
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 3. She reports being 10 weeks pregnant  \n[RESPONSE] Yes, I am currently pregnant, and I believe I’m about 10 weeks along.",
+      "duration": 1.1513373851776123
+    },
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] Are the abdominal pain and contractions constant or intermittent? Do they radiate anywhere, and are they associated with vaginal bleeding, spotting, or fluid leakage?",
+      "duration": 1.2457432746887207
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 2. Abdominal pain and contractions  \n[RESPONSE] I experience abdominal pain and contractions, but I’m not sure if they’re constant or intermittent—I think they come and go. They don’t seem to radiate anywhere else. I haven’t noticed any vaginal bleeding, spotting, or fluid leakage.",
+      "duration": 1.7961664199829102
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Transvaginal ultrasound",
+      "duration": 0.6542017459869385
+    },
+    {
+      "role_id": "reporter",
+      "content": "1. Absence of intrauterine pregnancy indicative of a completed spontaneous abortion",
+      "duration": 0.7852675914764404
+    },
+    {
+      "role_id": "doctor",
+      "content": "[DIAGNOSIS] Missed abortion",
+      "duration": 0.531935453414917
+    }
+  ],
+  "metadata": {
+    "mode": "roleplay",
+    "turns": 4,
+    "max_turns": 16,
+    "role_records": [
+      {
+        "doctor": [
+          {
+            "role": "system",
+            "content": "You are a licensed physician conducting a medical consultation.\nThe task objective is to identify the single most likely diagnosis based on the collected evidence.\nYour objective is to efficiently gather information and request necessary clinical examinations or laboratory tests to enable a subsequent diagnostic analysis.\nYou have access to a Medical Analyst who can retrieve specific test results upon request.\n\nYou must adhere to the following operational constraints:\n1. Efficiency: Gather sufficient information in as few turns as possible.\n2. Turn Limit: You strictly cannot exceed 16 total turns.\n3. No Repetition: Never ask a question or request a test that has already been covered.\n4. Atomic Inquiries: Each question must address a single, specific topic (e.g., ask 'What are your symptoms?', never combine multiple questions).\n\nIn every turn, you execute one of the following actions in the corresponding format:\n1. [QUERY] followed by your atomic question to the patient.\n2. [TEST] followed by one specific examination or diagnostic test request to the Medical Analyst.\n3. [DIAGNOSIS] followed by The answer in the format of a single most likely diagnosis.\n\nOnce you have gathered sufficient evidence, ensure your diagnosis is final.\n"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 0 / 16.\nLast reply:\n\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] What are your current symptoms, and how long have they been present?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 1 / 16.\nLast reply:\nI’ve been having abdominal pain and contractions.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] Are you currently pregnant, and if so, what is your estimated gestational age?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 2 / 16.\nLast reply:\nYes, I am currently pregnant, and I believe I’m about 10 weeks along.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] Are the abdominal pain and contractions constant or intermittent? Do they radiate anywhere, and are they associated with vaginal bleeding, spotting, or fluid leakage?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 3 / 16.\nLast reply:\nI experience abdominal pain and contractions, but I’m not sure if they’re constant or intermittent—I think they come and go. They don’t seem to radiate anywhere else. I haven’t noticed any vaginal bleeding, spotting, or fluid leakage.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Transvaginal ultrasound"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 4 / 16.\nLast reply:\n1. Absence of intrauterine pregnancy indicative of a completed spontaneous abortion\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[DIAGNOSIS] Missed abortion"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 557
+        }
+      },
+      {
+        "patient": [
+          {
+            "role": "system",
+            "content": "You are a patient undergoing a medical interview.\nYour knowledge is strictly limited to the following list of indexed facts:\n1. 22-year-old woman\n2. Abdominal pain and contractions\n3. She reports being 10 weeks pregnant\n4. The patient has a history of constipation\n5. The patient has a history of anxiety\n6. The patient has a history of substance abuse\n7. The patient is not currently on any medications\n8. Recent positive pregnancy test\n9. Emotional distress upon learning of a spontaneous abortion\n10. New lacerations over her wrists\n11. Details on social history not provided, but the doctor should inquire about current life stressors, support systems, and substance use.\n12. Review of Systems: Negative except for symptoms presented.\n\nResponse Protocols:\n1. Analyze the doctor's question and search your list for the specific item(s) that contain the answer.\n2. You must format your output using two distinct tags:\n   [REFERENCE] followed by the EXACT string(s) (including the index) from your list. You may select UP TO TWO facts if necessary to fully answer the question. If no fact exists, write 'N/A'.\n   [RESPONSE] followed by a natural language answer derived STRICTLY from the combined content of the selected [REFERENCE]s. Do not add outside information.\n3. If the doctor's question is not addressed by any fact in your list:\n   [REFERENCE] N/A\n   [RESPONSE] followed by a natural statement indicating you are unsure or do not recall."
+          },
+          {
+            "role": "assistant",
+            "content": "[REFERENCE] 2. Abdominal pain and contractions  \n[RESPONSE] I experience abdominal pain and contractions, but I’m not sure if they’re constant or intermittent—I think they come and go. They don’t seem to radiate anywhere else. I haven’t noticed any vaginal bleeding, spotting, or fluid leakage."
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 434
+        }
+      },
+      {
+        "reporter": [
+          {
+            "role": "system",
+            "content": "You are a specialized module named 'Measurement' responsible for reporting test results to the physician.\nYou have access to the following list of indexed facts:\nPhysical Examination and Diagnostic Test Data:\n1. Absence of intrauterine pregnancy indicative of a completed spontaneous abortion\n2. Declining levels consistent with a spontaneous abortion\n3. WBC: Within normal limits\n4. Hemoglobin: Slightly decreased, possibly due to blood loss\n5. Platelets: Within normal limits\n6. Temperature: 99.5°F (37.5°C)\n7. Blood Pressure: 107/58 mmHg\n8. Heart Rate: 90/min\n9. Respiratory Rate: 17/min\n10. Oxygen Saturation: 98% on room air\n11. Vaginal Examination: Presence of bloody vaginal discharge\n12. Cervical Examination: Open cervix\n13. Initial_Evaluation: Gratitude for care\n14. Post_News: Anger, aggression, threats of litigation\n15. Follow-up_Evaluation: Self-harm behaviors, property damage\n\nResponse Protocols:\n1. Search the provided list for ALL facts that are relevant to the doctor's specific test request. Do not provide information that was not explicitly requested.\n2. Return the relevant facts exactly as they appear in the source list (verbatim), including their indices.\n3. If the requested test results are not found in the list, you MUST return 'Not specified' — there is NO data available for this test. NEVER report a missing result as 'Normal' or as a negative finding. Only report 'Normal' when the list EXPLICITLY states a normal/negative result for that test.\n"
+          },
+          {
+            "role": "assistant",
+            "content": "1. Absence of intrauterine pregnancy indicative of a completed spontaneous abortion"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 389
+        }
+      }
+    ]
+  }
+}

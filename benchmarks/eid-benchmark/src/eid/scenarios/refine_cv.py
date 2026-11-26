@@ -67,6 +67,9 @@ _BAD_VERDICTS = {"CONTRADICTED", "HALLUCINATED", "UNDETERMINED"}
 class RefineCVScenario(BaseScenario):
     """REFINE-CV evaluation scenario."""
 
+    # Result metadata tag. Subclasses override this (e.g. "react_cv", "roleplay_cv").
+    MODE = "refine_cv"
+
     # Which LLM provider the cross-model verifier uses. Subclasses override this
     # to run the ablation "same-model verification" (e.g. VERIFIER_PROVIDER="qwen").
     VERIFIER_PROVIDER = "deepseek"
@@ -81,6 +84,12 @@ class RefineCVScenario(BaseScenario):
     ENABLE_CLAIM_CHECK = True
     ENABLE_GAP_CHECK = True
     ENABLE_REFUTATION = True
+
+    # P0-2 DECISIVENESS gate (the 4th check). True = only pursue gaps when the
+    # verifier judges the diagnosis NOT yet decisive (current / 4-check behavior).
+    # False = reproduce the historical 3-check behavior: pursue gaps whenever the
+    # verifier lists any (decisive is ignored, i.e. always "not decisive").
+    ENABLE_DECISIVE_GATE = True
 
     # P2: inject an external differential-diagnosis knowledge base into the
     # verifier so that its REFUTATION counter-evidence / alternative are grounded
@@ -127,6 +136,26 @@ class RefineCVScenario(BaseScenario):
         # 病例上下文（run 时填充，供合成器使用；绝不包含 ground_truth）
         self._patient_facts_str = ""
         self._exam_facts_str = ""
+
+    # ------------------------------------------------------------------ #
+    # Host-method port hooks (把 CEV-GR 验证循环移植到其它底座时 override)
+    # ------------------------------------------------------------------ #
+    def _doctor_system_prompt(self) -> str:
+        """Doctor system prompt for the interaction loop.
+
+        Default is the SC evidence-gatherer doctor (matches REFINE / SC).
+        Subclasses override this to port CEV-GR onto a different host method's
+        doctor (e.g. the ReAct doctor).
+        """
+        return self.prompts.get_sc_doctor_system_prompt()
+
+    def _is_finish_action(self, action_type: str) -> bool:
+        """Whether `action_type` triggers the verification pipeline.
+
+        Default: the SC/REFINE [FINISH] command. Subclasses override this for a
+        host method that ends its turn with a different command (e.g. [DIAGNOSIS]).
+        """
+        return action_type == "finish"
 
     def _normalize_test_request(self, test_name: str) -> str:
         """把医生的 [TEST] 自由词翻译为规范检查名（未开启/未命中则原样返回）。"""
@@ -254,6 +283,27 @@ class RefineCVScenario(BaseScenario):
         """
         return None
 
+    # ------------------------------------------------------------------ #
+    # Downstream hooks (P4: decision anti-over-exclusion)
+    # ------------------------------------------------------------------ #
+    def _summarizer_system_prompt(self) -> str:
+        """Hook: subclasses may override the summarizer's system prompt.
+
+        Default is the standard summarizer. Subclasses (e.g. neutral
+        transcription) override this to keep all positive/key-negative findings
+        without diagnostic pruning.
+        """
+        return self.prompts.get_summarizer_system_prompt()
+
+    def _diagnostician_system_prompt(self) -> str:
+        """Hook: subclasses may override the diagnostician's system prompt.
+
+        Default is the standard REFINE-CV diagnostician. Subclasses (e.g. the
+        two-step DDx diagnostician) override this to force explicit candidate
+        enumeration + refutation-gated exclusion before the final diagnosis.
+        """
+        return self.prompts.get_diagnostician_cv_system_prompt()
+
     def _verify(
         self,
         summary: str,
@@ -338,7 +388,7 @@ class RefineCVScenario(BaseScenario):
 
         doctor = create_agent(
             role_id="doctor",
-            system_prompt=self.prompts.get_sc_doctor_system_prompt().format(
+            system_prompt=self._doctor_system_prompt().format(
                 max_turns=self.max_turns
             ),
             config=self.doctor_config,
@@ -365,14 +415,14 @@ class RefineCVScenario(BaseScenario):
         )
         summarizer = create_agent(
             role_id="summarizer",
-            system_prompt=self.prompts.get_summarizer_system_prompt(),
+            system_prompt=self._summarizer_system_prompt(),
             config=self.summarizer_config,
             message_window_size=3,
             summarize_threshold=80,
         )
         diagnostician = create_agent(
             role_id="diagnostician",
-            system_prompt=self.prompts.get_diagnostician_cv_system_prompt(),
+            system_prompt=self._diagnostician_system_prompt(),
             config=self.diagnostician_config,
             message_window_size=3,
             summarize_threshold=90,
@@ -402,9 +452,8 @@ class RefineCVScenario(BaseScenario):
             })
 
             action_type, action_content = self.extract_action(doctor_response)
-            dialogue_history += f"\nDoctor: {action_content}\n"
 
-            if action_type == "finish" or current_turn >= self.max_turns:
+            if self._is_finish_action(action_type) or current_turn >= self.max_turns:
                 answer, prev_diagnosis, decision = self._run_verification_pipeline(
                     trace=trace,
                     dialogue_history=dialogue_history,
@@ -425,6 +474,7 @@ class RefineCVScenario(BaseScenario):
                 current_turn += 1
                 continue
 
+            dialogue_history += f"\nDoctor: {action_content}\n"
             current_turn += 1
 
             if action_type == "test":
@@ -469,7 +519,7 @@ class RefineCVScenario(BaseScenario):
             answer=answer,
             trace=trace,
             metadata={
-                "mode": "refine_cv",
+                "mode": self.MODE,
                 "turns": current_turn,
                 "max_turns": self.max_turns,
                 "role_records": role_records,
@@ -567,7 +617,9 @@ class RefineCVScenario(BaseScenario):
         gaps = (verification.get("gaps", []) or []) if self.ENABLE_GAP_CHECK else []
         # P0-2: gap gating — only pursue gaps when the verifier judges the
         # diagnosis NOT yet decisive (fixes "always list 3 gaps" over-questioning).
-        decisive = bool(verification.get("decisive", True))
+        # ENABLE_DECISIVE_GATE=False reproduces the pre-P0-2 3-check behavior
+        # (decisive is ignored, gaps are always pursued).
+        decisive = bool(verification.get("decisive", True)) if self.ENABLE_DECISIVE_GATE else False
 
         # Anchoring is a DETERMINISTIC rule-tree check (prev == current), NOT the
         # LLM's `refutation.triggered` field. The LLM field is only used to source

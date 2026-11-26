@@ -1,0 +1,276 @@
+{
+  "case_id": "agentclinic_medqa_198",
+  "prediction": "Community-acquired pneumonia (CAP)",
+  "ground_truth": "Pneumonia",
+  "trace": [
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] What are your current symptoms, and how long have they been present?",
+      "duration": 0.8641180992126465
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 2. The patient reports experiencing fever, chills, and a headache three days after undergoing an open cholecystectomy.  \n[REFERENCE] 3. She mentions right-sided chest pain that increases on inspiration.  \n[REFERENCE] 4. She has had a productive cough for the last 12 hours.  \n[RESPONSE] I’ve had fever, chills, and a headache for three days—starting three days after my gallbladder surgery. I also have right-sided chest pain that gets worse when I breathe in, and I’ve had a productive cough for the last 12 hours.",
+      "duration": 3.207166910171509
+    },
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] Have you noticed any shortness of breath, rapid breathing, or coughing up blood (hemoptysis)?",
+      "duration": 0.875145673751831
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 4. She has had a productive cough for the last 12 hours.  \n[RESPONSE] Yes, I’ve had a productive cough for the last 12 hours, but I haven’t noticed shortness of breath, rapid breathing, or coughing up blood.",
+      "duration": 1.8902904987335205
+    },
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] Have you experienced any leg swelling, pain, or tenderness—especially in the calf—or have you been mostly immobile since surgery?",
+      "duration": 0.9766948223114014
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall experiencing leg swelling, pain, or tenderness—especially in the calf—and I’m not sure about my mobility level since surgery.",
+      "duration": 1.2365472316741943
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] D-dimer level",
+      "duration": 0.48801398277282715
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.5000813007354736
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Chest X-ray",
+      "duration": 0.48105597496032715
+    },
+    {
+      "role_id": "reporter",
+      "content": "4. Chest X-Ray findings: Infiltrates in the right lower lobe consistent with pneumonia.",
+      "duration": 0.8533663749694824
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Complete blood count (CBC) with differential",
+      "duration": 0.5794408321380615
+    },
+    {
+      "role_id": "reporter",
+      "content": "1. WBC: 15,000 /μL (elevated).  \n2. Hemoglobin: 14 g/dL.  \n3. Platelets: 300,000 /μL.",
+      "duration": 1.4404208660125732
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Blood cultures",
+      "duration": 0.48947572708129883
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.3818633556365967
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Sputum culture and sensitivity",
+      "duration": 0.7324330806732178
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.36542391777038574
+    },
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] Have you had any recent antibiotic use, and if so, which ones and for how long?",
+      "duration": 0.9457182884216309
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall any recent antibiotic use.",
+      "duration": 0.845841646194458
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Procalcitonin level",
+      "duration": 0.5614461898803711
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.35568666458129883
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] Arterial blood gas (ABG)",
+      "duration": 0.6281688213348389
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.48179149627685547
+    },
+    {
+      "role_id": "doctor",
+      "content": "[TEST] CT pulmonary angiography (CTPA)",
+      "duration": 0.5961940288543701
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.4037747383117676
+    },
+    {
+      "role_id": "doctor",
+      "content": "[DIAGNOSIS] Community-acquired pneumonia (CAP)",
+      "duration": 0.7080907821655273
+    }
+  ],
+  "metadata": {
+    "mode": "roleplay",
+    "turns": 12,
+    "max_turns": 16,
+    "role_records": [
+      {
+        "doctor": [
+          {
+            "role": "system",
+            "content": "You are a licensed physician conducting a medical consultation.\nThe task objective is to identify the single most likely diagnosis based on the collected evidence.\nYour objective is to efficiently gather information and request necessary clinical examinations or laboratory tests to enable a subsequent diagnostic analysis.\nYou have access to a Medical Analyst who can retrieve specific test results upon request.\n\nYou must adhere to the following operational constraints:\n1. Efficiency: Gather sufficient information in as few turns as possible.\n2. Turn Limit: You strictly cannot exceed 16 total turns.\n3. No Repetition: Never ask a question or request a test that has already been covered.\n4. Atomic Inquiries: Each question must address a single, specific topic (e.g., ask 'What are your symptoms?', never combine multiple questions).\n\nIn every turn, you execute one of the following actions in the corresponding format:\n1. [QUERY] followed by your atomic question to the patient.\n2. [TEST] followed by one specific examination or diagnostic test request to the Medical Analyst.\n3. [DIAGNOSIS] followed by The answer in the format of a single most likely diagnosis.\n\nOnce you have gathered sufficient evidence, ensure your diagnosis is final.\n"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 1 / 16.\nLast reply:\nI’ve had fever, chills, and a headache for three days—starting three days after my gallbladder surgery. I also have right-sided chest pain that gets worse when I breathe in, and I’ve had a productive cough for the last 12 hours.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] Have you noticed any shortness of breath, rapid breathing, or coughing up blood (hemoptysis)?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 2 / 16.\nLast reply:\nYes, I’ve had a productive cough for the last 12 hours, but I haven’t noticed shortness of breath, rapid breathing, or coughing up blood.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] Have you experienced any leg swelling, pain, or tenderness—especially in the calf—or have you been mostly immobile since surgery?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 3 / 16.\nLast reply:\nI don’t recall experiencing leg swelling, pain, or tenderness—especially in the calf—and I’m not sure about my mobility level since surgery.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] D-dimer level"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 4 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Chest X-ray"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 5 / 16.\nLast reply:\n4. Chest X-Ray findings: Infiltrates in the right lower lobe consistent with pneumonia.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Complete blood count (CBC) with differential"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 6 / 16.\nLast reply:\n1. WBC: 15,000 /μL (elevated).  \n2. Hemoglobin: 14 g/dL.  \n3. Platelets: 300,000 /μL.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Blood cultures"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 7 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Sputum culture and sensitivity"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 8 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[QUERY] Have you had any recent antibiotic use, and if so, which ones and for how long?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 9 / 16.\nLast reply:\nI don’t recall any recent antibiotic use.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Procalcitonin level"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 10 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] Arterial blood gas (ABG)"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 11 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[TEST] CT pulmonary angiography (CTPA)"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 12 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[DIAGNOSIS] Community-acquired pneumonia (CAP)"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 776
+        }
+      },
+      {
+        "patient": [
+          {
+            "role": "system",
+            "content": "You are a patient undergoing a medical interview.\nYour knowledge is strictly limited to the following list of indexed facts:\n1. 57-year-old obese female.\n2. The patient reports experiencing fever, chills, and a headache three days after undergoing an open cholecystectomy.\n3. She mentions right-sided chest pain that increases on inspiration.\n4. She has had a productive cough for the last 12 hours.\n5. She had an episode of hypotension post-operation that was resolved with IV fluids.\n6. Underwent abdominal hysterectomy 16 years ago for multiple fibroids of the uterus.\n7. She has a 17-year history of smoking one pack of cigarettes daily.\n8. Reports discomfort.\n9. No other abnormalities noted apart from the symptoms related to her recent surgery and current complaints.\n\nResponse Protocols:\n1. Analyze the doctor's question and search your list for the specific item(s) that contain the answer.\n2. You must format your output using two distinct tags:\n   [REFERENCE] followed by the EXACT string(s) (including the index) from your list. You may select UP TO TWO facts if necessary to fully answer the question. If no fact exists, write 'N/A'.\n   [RESPONSE] followed by a natural language answer derived STRICTLY from the combined content of the selected [REFERENCE]s. Do not add outside information.\n3. If the doctor's question is not addressed by any fact in your list:\n   [REFERENCE] N/A\n   [RESPONSE] followed by a natural statement indicating you are unsure or do not recall."
+          },
+          {
+            "role": "assistant",
+            "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall any recent antibiotic use."
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 387
+        }
+      },
+      {
+        "reporter": [
+          {
+            "role": "system",
+            "content": "You are a specialized module named 'Measurement' responsible for reporting test results to the physician.\nYou have access to the following list of indexed facts:\nPhysical Examination and Diagnostic Test Data:\n1. WBC: 15,000 /μL (elevated).\n2. Hemoglobin: 14 g/dL.\n3. Platelets: 300,000 /μL.\n4. Chest X-Ray findings: Infiltrates in the right lower lobe consistent with pneumonia.\n5. Temperature: 39°C (102.2°F).\n6. Blood Pressure: 128/82 mmHg.\n7. Heart Rate: 98 bpm.\n8. Respiratory Rate: 18 breaths/min.\n9. Chest examination inspection: Normal chest wall movement.\n10. Chest examination palpation: No tenderness or deformities.\n11. Chest examination percussion: Normal resonance.\n12. Chest auscultation: Inspiratory crackles at the right lung base.\n13. Abdominal inspection: Healing surgical incision below the right ribcage.\n14. Abdominal auscultation: Normal bowel sounds.\n15. Abdominal percussion: Normal.\n16. Abdominal palpation: Soft and nontender.\n\nResponse Protocols:\n1. Search the provided list for ALL facts that are relevant to the doctor's specific test request. Do not provide information that was not explicitly requested.\n2. Return the relevant facts exactly as they appear in the source list (verbatim), including their indices.\n3. If the requested test results are not found in the list, you MUST return 'Not specified' — there is NO data available for this test. NEVER report a missing result as 'Normal' or as a negative finding. Only report 'Normal' when the list EXPLICITLY states a normal/negative result for that test.\n"
+          },
+          {
+            "role": "assistant",
+            "content": "Not specified"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 388
+        }
+      }
+    ]
+  }
+}

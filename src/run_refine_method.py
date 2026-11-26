@@ -1,15 +1,21 @@
 """通用 runner：跑指定的 refine_cv_qwen 变体 30 例（同口径）。
 
 支持 method：
-  - rag      : RefineCVQwenGapRefuteRAGScenario  （oracle KB，实验② 同批重跑）
-  - emptyddx : RefineCVQwenGapRefuteEmptyDDXScenario（空 DDx 占位，实验③方案1）
+  - rag        : RefineCVQwenGapRefuteRAGScenario  （oracle KB，实验② 同批重跑）
+  - emptyddx   : RefineCVQwenGapRefuteEmptyDDXScenario（空 DDx 占位，实验③方案1）
+  - doctorddx  : RefineCVQwenGapRefuteDoctorDDXScenario（P3 DDx 驱动问诊）
+  - ddxdiag    : RefineCVQwenGapRefuteDDXDiagScenario（P4 方案2a diagnostician 两步法）
+  - neutralsumm: RefineCVQwenGapRefuteNeutralSummScenario（P4 方案2b summarizer 中性转录）
+  - joint      : RefineCVQwenGapRefuteJointScenario（P4 方案2c 联合）
+  - gaprefute  : RefineCVQwenGapRefuteScenario（baseline 同批重跑，输出到 _rerun 目录，消除时间漂移）
+  - llmddxns   : RefineCVQwenGapRefuteLLMDDXNeutralSummScenario（层2 + 2b 组合）
+  - llmddxqwen : RefineCVQwenGapRefuteLLMDDXQwenGenScenario（层2 DDx 生成换 qwen-plus）
 
-与 baseline refine_cv_qwen_gap_refute、层 2 refine_cv_qwen_gap_refute_llmddx 同口径：
+与 baseline refine_cv_qwen_gap_refute 同口径：
   - qwen-plus 医生/病人/测量/总结/诊断，verifier 用 DeepSeek
   - max_turns=10，dataset 前 30 例（case_id 与 baseline/层2 完全一致）
 
-运行：python3 src/run_refine_method.py rag 30 10
-      python3 src/run_refine_method.py emptyddx 30 10
+运行：python3 src/run_refine_method.py <method> 30 10
 """
 import os
 import sys
@@ -44,14 +50,37 @@ os.chdir(EID_ROOT)
 from eid.config import ModelConfig  # noqa: E402
 from eid.datasets import load_dataset  # noqa: E402
 from eid.scenarios.base import CaseInput  # noqa: E402
-from eid.scenarios.refine_cv_ablations import RefineCVQwenGapRefuteRAGScenario  # noqa: E402
+from eid.scenarios.refine_cv_ablations import (  # noqa: E402
+    RefineCVQwenGapRefuteRAGScenario,
+    RefineCVQwenGapRefuteScenario,
+)
+from eid.scenarios.refine_cv_llmddx_variants import (  # noqa: E402
+    RefineCVQwenGapRefuteLLMDDXNeutralSummScenario,
+    RefineCVQwenGapRefuteLLMDDXQwenGenScenario,
+)
+from eid.scenarios.refine_clean import RefineCleanScenario  # noqa: E402
+from eid.scenarios.refine_cv_runtimeddx import RefineCVQwenGapRefuteLLMDDXScenario  # noqa: E402
 from eid.scenarios.refine_cv_emptyddx import RefineCVQwenGapRefuteEmptyDDXScenario  # noqa: E402
 from eid.scenarios.refine_cv_doctorddx import RefineCVQwenGapRefuteDoctorDDXScenario  # noqa: E402
+from eid.scenarios.refine_cv_ddxdiag import (  # noqa: E402
+    RefineCVQwenGapRefuteDDXDiagScenario,
+    RefineCVQwenGapRefuteNeutralSummScenario,
+    RefineCVQwenGapRefuteJointScenario,
+)
 
 METHODS = {
     "rag": ("refine_cv_qwen_gap_refute_rag", RefineCVQwenGapRefuteRAGScenario),
     "emptyddx": ("refine_cv_qwen_gap_refute_emptyddx", RefineCVQwenGapRefuteEmptyDDXScenario),
     "doctorddx": ("refine_cv_qwen_gap_refute_doctorddx", RefineCVQwenGapRefuteDoctorDDXScenario),
+    "ddxdiag": ("refine_cv_qwen_gap_refute_ddxdiag", RefineCVQwenGapRefuteDDXDiagScenario),
+    "neutralsumm": ("refine_cv_qwen_gap_refute_neutralsumm", RefineCVQwenGapRefuteNeutralSummScenario),
+    "joint": ("refine_cv_qwen_gap_refute_joint", RefineCVQwenGapRefuteJointScenario),
+    "gaprefute": ("refine_cv_qwen_gap_refute_rerun", RefineCVQwenGapRefuteScenario),
+    "llmddx": ("refine_cv_qwen_gap_refute_llmddx_rerun", RefineCVQwenGapRefuteLLMDDXScenario),
+    "llmddxns": ("refine_cv_qwen_gap_refute_llmddx_neutralsumm", RefineCVQwenGapRefuteLLMDDXNeutralSummScenario),
+    "llmddxqwen": ("refine_cv_qwen_gap_refute_llmddx_qwengen", RefineCVQwenGapRefuteLLMDDXQwenGenScenario),
+    # 干净 baseline：上游 RefineScenario 原样（PASS/INCOMPLETE verifier，同模型 verifier）
+    "refineclean": ("refine_clean", RefineCleanScenario),
 }
 
 

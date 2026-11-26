@@ -121,3 +121,25 @@ class RefineCVQwenRefuteOnlyRAGScenario(RefineCVQwenRefuteOnlyScenario):
     """REFUTATION-only + external DDX knowledge injection (P2, oracle KB)."""
 
     ENABLE_RAG = True
+
+
+class RefineCVNoDecisiveScenario(RefineCVScenario):
+    """Cross-model (DeepSeek) 3-check verifier WITHOUT the DECISIVENESS gate.
+
+    Reproduces the historical "3-check" version (claim + gap + refutation) where
+    the verifier's `decisive` signal is ignored and any listed gap is pursued.
+    Contrast with RefineCVScenario (4-check) to measure the NET contribution of
+    the DECISIVENESS gate under the cross-model verifier.
+    """
+
+    ENABLE_DECISIVE_GATE = False
+
+
+class RefineCVQwenNoDecisiveScenario(RefineCVQwenScenario):
+    """Same-model (qwen) 3-check verifier WITHOUT the DECISIVENESS gate.
+
+    Same as above but with the same-model verifier, isolating the DECISIVENESS
+    gate's contribution independent of the cross-model variable.
+    """
+
+    ENABLE_DECISIVE_GATE = False
