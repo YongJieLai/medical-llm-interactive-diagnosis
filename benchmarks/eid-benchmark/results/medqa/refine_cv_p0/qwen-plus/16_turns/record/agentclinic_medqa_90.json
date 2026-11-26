@@ -1,0 +1,505 @@
+{
+  "case_id": "agentclinic_medqa_90",
+  "prediction": "Idiopathic Intracranial Hypertension",
+  "ground_truth": "Waldenstrom macroglobulinemia",
+  "trace": [
+    {
+      "role_id": "doctor",
+      "content": "[QUERY] What is your chief complaint or the main symptom that brought you in today?",
+      "duration": 0.8349370956420898
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 2. The patient reports a 3-week history of headache.  \n[RESPONSE] My main symptom is a headache that’s been going on for three weeks.",
+      "duration": 1.3376052379608154
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Chronic headache (≥4 weeks) raises concern for secondary causes (e.g., intracranial mass, idiopathic intracranial hypertension, infection, vasculitis) more than primary headache disorders (e.g., chronic migraine), though those remain possible. Key discriminators include: onset pattern (gradual vs. sudden), associated neurological symptoms (e.g., focal deficits, seizures), red flags (e.g., headache worsening with Valsalva, positional changes, fever, weight loss, papilledema), and prior headache history. The single most discriminating next question is whether the headache is new or different from prior headaches — this helps distinguish new-onset secondary headache from progression of a primary disorder.\n\n[QUERY] Is this headache new for you, or is it different in character, severity, or frequency compared to any headaches you’ve had before?",
+      "duration": 4.518470287322998
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 2. The patient reports a 3-week history of headache.  \n[RESPONSE] Yes, this headache is new—it started about three weeks ago.",
+      "duration": 1.1035046577453613
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] New-onset headache over 3 weeks strongly favors secondary cause. Next critical step is identifying red flags. Among the most urgent are: neurological deficits (e.g., weakness, vision changes, speech difficulty), altered mental status, fever, neck stiffness, or papilledema — all suggesting structural, infectious, or inflammatory etiology. Since neurological exam findings (e.g., focal deficits) are highly specific for intracranial pathology, and can be rapidly assessed clinically, the next best step is to screen for objective neurological abnormalities.\n\n[QUERY] Have you noticed any new weakness, numbness, trouble speaking, double vision, loss of balance, or changes in your vision (like blurring or blind spots)?",
+      "duration": 3.542954444885254
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 3. The patient reports progressively worsening vision.  \n[RESPONSE] Yes, I’ve noticed my vision has been getting progressively worse over the past few weeks.",
+      "duration": 1.0887925624847412
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Progressive visual decline + new-onset chronic headache is highly concerning for increased intracranial pressure (e.g., idiopathic intracranial hypertension, intracranial mass, venous sinus thrombosis) or optic neuropathy (e.g., compressive from tumor). Papilledema is the key clinical sign linking these — it’s present in >90% of IIH cases and common in mass lesions causing elevated ICP. Fundoscopic exam is rapid, non-invasive, and directly assesses for this critical finding. It is the single most discriminating next step.\n\n[TEST] Fundoscopic examination",
+      "duration": 3.21441650390625
+    },
+    {
+      "role_id": "reporter",
+      "content": "11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.",
+      "duration": 1.01469087600708,
+      "request": "Fundoscopic examination",
+      "request_normalized": "Fundoscopic examination",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] The Medical Analyst’s reply states “Details are not provided… but imagine findings suggestive of retinal vein occlusion or hemorrhages.” This is atypical — retinal vein occlusion (RVO) is not a classic sign of intracranial hypertension; rather, papilledema (venous engorgement, blurred disc margins, flame hemorrhages) is expected. RVO suggests possible systemic vascular disease (e.g., hypertension, hypercoagulability) or local retinal pathology — but in context of new headache + progressive vision loss, it raises concern for alternative or coexisting etiologies such as cerebral venous sinus thrombosis (CVST), which can cause both elevated ICP *and* retinal hemorrhages/venous congestion due to impaired cerebral venous drainage. CVST is a critical diagnosis to rule out — it’s rare but life-threatening and treatable.\n\nThe most discriminating next test is neuroimaging: MRI brain with MR venography (MRV) is the gold standard for detecting CVST and structural lesions. CT head is less sensitive for early CVST and subtle masses, but if MRI is unavailable, non-contrast CT can screen for gross mass effect or hemorrhage. Since the Analyst previously indicated test availability constraints, I must request the highest-yield imaging modality *available*. MRV is essential here — but if not available, CT venography (CTV) is an acceptable alternative.\n\n[TEST] MRI brain with MR venography (MRV)",
+      "duration": 7.29913592338562
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.4914052486419678,
+      "request": "MRI brain with MR venography (MRV)",
+      "request_normalized": "MRI brain with MR venography (MRV)",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] The reply “Not specified” is ambiguous — it may indicate the test result is pending, unavailable, or not yet performed. Since the prior request for MRI brain with MRV yielded no result, and we cannot proceed without imaging confirmation, I must verify whether the test was completed or if an alternative is needed. However, per protocol, I must avoid repeating a test request unless clarified. Instead, I should pivot to the next highest-yield *available* test that addresses the same diagnostic question: ruling out cerebral venous sinus thrombosis (CVST) and structural lesions. CT venography (CTV) is widely available, highly sensitive for CVST, and can also detect mass effect or hemorrhage. It is the appropriate fallback.\n\n[TEST] CT venography (CTV)",
+      "duration": 3.972977876663208
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.38675379753112793,
+      "request": "CT venography (CTV)",
+      "request_normalized": "CT venography (CTV)",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Two consecutive “Not specified” replies for advanced neuroimaging (MRI/MRV and CTV) suggest these modalities are not available in this clinical environment — consistent with the instruction to switch to available tests when a requested test is unavailable. I must now consult the list of “Available tests” that the Medical Analyst will provide in their next reply (as per prior constraint: if a test is unavailable, the Analyst lists alternatives). Since no available tests have been enumerated yet, the most efficient next step is to explicitly ask for that list — it will guide selection of the highest-yield *available* diagnostic test (e.g., lumbar puncture, basic labs, CT head, etc.) to evaluate for elevated ICP, infection, or inflammation.\n\n[QUERY] What diagnostic tests are currently available in this clinical environment?",
+      "duration": 4.065434694290161
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I’m not sure what diagnostic tests are available here—I don’t have that information.",
+      "duration": 1.0549488067626953
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] The Analyst cannot specify available tests — so I must rely on universally accessible, low-resource clinical assessments that are highly discriminatory for secondary headache with visual decline. Given progressive vision loss + new headache, elevated intracranial pressure (ICP) remains top differential. Lumbar puncture (LP) is both diagnostic and therapeutic for idiopathic intracranial hypertension (IIH) and can detect infection/inflammation; opening pressure measurement is definitive for elevated ICP. It is widely available, even in resource-limited settings, and directly addresses the pathophysiology suggested by symptoms and prior fundoscopic clues (e.g., hemorrhages suggestive of venous congestion). LP is thus the single most discriminating next step.\n\n[TEST] Lumbar puncture with opening pressure measurement and CSF analysis (cell count, glucose, protein, culture)",
+      "duration": 4.353817939758301
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.4858250617980957,
+      "request": "Lumbar puncture with opening pressure measurement and CSF analysis (cell count, glucose, protein, culture)",
+      "request_normalized": "Lumbar puncture with opening pressure measurement and CSF analysis (cell count, glucose, protein, culture)",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] “Not specified” for lumbar puncture suggests it may not be available or feasible in this setting — or the result is pending. Since we cannot confirm CSF pressure or composition, and imaging is unavailable, the next highest-yield *clinical* assessment is to evaluate for signs of elevated ICP that can be detected without instrumentation: e.g., sixth nerve palsy (abducens nerve is most vulnerable to increased ICP due to its long intracranial course), which manifests as horizontal diplopia or inability to abduct the eye. This is a classic, specific sign of raised ICP — present in ~25–50% of IIH cases and many mass lesions. It’s easily tested at bedside and highly discriminating between benign primary headache and dangerous secondary causes.\n\n[QUERY] Have you noticed double vision — especially when looking to the side — or difficulty moving one or both eyes outward?",
+      "duration": 4.984242677688599
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall noticing double vision or trouble moving my eyes outward — that hasn’t been something I’ve experienced or paid attention to.",
+      "duration": 1.2698760032653809
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Absence of sixth nerve palsy reduces (but does not exclude) elevated ICP — however, progressive visual loss + new headache still strongly suggests optic nerve or chiasmal compression (e.g., pituitary adenoma, meningioma) or inflammatory optic neuropathy. Given the chronicity and progression, anterior visual pathway pathology is likely. Visual field testing is critical: bitemporal hemianopia points to chiasmal compression (e.g., pituitary macroadenoma), while central or altitudinal defects suggest optic nerve involvement. Confrontation visual field exam is rapid, bedside, and available universally — it can detect gross field defects that localize the lesion.\n\n[QUERY] Can you cover one eye and tell me if you notice any areas where your side (peripheral) vision is missing — for example, when you look straight ahead, can you see my hand moving at the very edge of your vision on the left or right side? We’ll test each eye separately.",
+      "duration": 5.530819416046143
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] 3. The patient reports progressively worsening vision.  \n[RESPONSE] Yes, I’ve noticed my vision has been getting worse over the past few weeks — I’m not sure exactly where it’s missing, but things seem less clear overall, especially out of the corners of my eyes.",
+      "duration": 1.8272104263305664
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] The patient reports generalized blurring and impaired peripheral (corner) vision — consistent with bilateral visual field constriction or early bitemporal hemianopia, both highly suggestive of chiasmal compression (e.g., pituitary adenoma). This, combined with new-onset headache and progressive vision loss over weeks, makes a suprasellar mass the leading diagnosis. The most discriminating next step is to assess for endocrine dysfunction — pituitary adenomas often secrete hormones (e.g., prolactin, growth hormone, cortisol) or cause hypopituitarism (e.g., amenorrhea, fatigue, low libido, cold intolerance). Asking about menstrual history in premenopausal women or symptoms of hormone excess/deficiency provides rapid, high-yield clinical data to support or refute this.\n\nSince gender/age hasn’t been established, I’ll ask a gender-neutral, high-sensitivity screening question for pituitary dysfunction: fatigue and amenorrhea are among the most common early signs — but amenorrhea only applies if assigned female at birth. To avoid assumptions, I’ll ask about two cardinal systemic symptoms: unexplained fatigue (present in >80% of pituitary insufficiency) and recent changes in menstrual cycles *if applicable*, while keeping it open-ended.\n\n[QUERY] Have you experienced unusual fatigue, low energy, or changes in your menstrual cycle (if applicable), sexual interest, or ability to tolerate cold or stress?",
+      "duration": 7.673468112945557
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall experiencing unusual fatigue, low energy, or changes in menstrual cycle — and I’m postmenopausal, so that’s not applicable. I also haven’t noticed changes in sexual interest or in how I tolerate cold or stress.",
+      "duration": 1.809753179550171
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] The patient is postmenopausal and denies systemic endocrine symptoms — this makes a *functioning* pituitary adenoma (e.g., prolactinoma, acromegaly, Cushing’s) less likely, but does not exclude a *non-functioning* macroadenoma, which commonly presents with headache + progressive bitemporal visual field loss due to chiasmal compression — and often lacks hormonal symptoms until late. Given the high specificity of bitemporal field defects for chiasmal lesions, and absence of alternative explanations, the top diagnosis remains non-functioning pituitary macroadenoma or other suprasellar mass (e.g., craniopharyngioma, meningioma). Since advanced imaging remains unavailable and LP was not specified, the next best step is to assess for optic disc pallor — a sign of chronic optic nerve damage that would support longstanding compression. While fundoscopy was previously requested, no findings were reported; thus, repeating fundoscopy now with explicit focus on optic disc color (pallor = atrophy) is essential to confirm chronicity and severity of optic pathway injury.\n\n[TEST] Fundoscopic examination, with specific assessment for optic disc pallor",
+      "duration": 6.894501209259033
+    },
+    {
+      "role_id": "reporter",
+      "content": "11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.",
+      "duration": 1.0113143920898438,
+      "request": "Fundoscopic examination, with specific assessment for optic disc pallor",
+      "request_normalized": "Fundoscopic examination, with specific assessment for optic disc pallor",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Repeated fundoscopy request yielded the same non-specific reply mentioning retinal vein occlusion/hemorrhages — which is inconsistent with classic chiasmal compression (which causes optic atrophy, not retinal hemorrhages) but aligns more with venous congestion from elevated ICP or CVST. Given persistent visual decline + headache + retinal hemorrhages, cerebral venous sinus thrombosis (CVST) remains a critical unconfirmed diagnosis — and while MRV/CTV were unavailable, D-dimer is a highly sensitive (though not specific) blood test for thrombosis. Elevated D-dimer would strongly support CVST and justify urgent anticoagulation; normal D-dimer makes CVST very unlikely. It is widely available, rapid, and low-cost.\n\n[TEST] D-dimer",
+      "duration": 4.775139808654785
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.4198033809661865,
+      "request": "D-dimer",
+      "request_normalized": "D-dimer",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] D-dimer is also “not specified”, suggesting it may be unavailable or not actionable in this setting. With imaging, LP, and lab tests all inaccessible, the remaining high-yield clinical assessment is to evaluate for signs of chronic intracranial hypertension *other than papilledema*: e.g., pulsatile tinnitus (present in ~60% of IIH), transient visual obscurations (TVOs — brief graying-out of vision on standing or bending), or neck/back pain from CSF pressure transmission. TVOs are highly specific for elevated ICP and often precede permanent visual loss. Asking about them provides critical functional evidence supporting IIH or CVST over structural compression.\n\n[QUERY] Have you ever experienced brief episodes — lasting seconds — where your vision suddenly dims or “grays out,” especially when standing up, bending over, or straining?",
+      "duration": 5.0029685497283936
+    },
+    {
+      "role_id": "patient",
+      "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall experiencing brief episodes where my vision suddenly dims or “grays out,” especially with standing up, bending over, or straining.",
+      "duration": 1.3442730903625488
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Absence of transient visual obscurations makes idiopathic intracranial hypertension less likely, and the lack of fatigue, endocrine symptoms, or sixth nerve palsy further reduces likelihood of IIH or functioning adenoma. Persistent progressive vision loss + headache + retinal hemorrhages (per prior fundoscopy note) — despite negative screening for common mimics — now strongly points to a non-thrombotic, non-mass-related optic neuropathy with secondary retinal vascular changes. One critical diagnosis that fits all: **sarcoidosis** — a systemic granulomatous disease that commonly causes chronic optic neuropathy (often bilateral, insidious), anterior uveitis, and can induce retinal periphlebitis or hemorrhages; it may also cause headaches via meningeal involvement or elevated ICP. Serum ACE and lysozyme are accessible blood tests; chest X-ray is widely available and detects hilar lymphadenopathy in >90% of pulmonary sarcoidosis cases — which correlates strongly with extrapulmonary involvement including neurosarcoid.\n\n[TEST] Chest X-ray",
+      "duration": 6.216958045959473
+    },
+    {
+      "role_id": "reporter",
+      "content": "Not specified",
+      "duration": 0.5266361236572266,
+      "request": "Chest X-ray",
+      "request_normalized": "Chest X-ray",
+      "synthetic": false
+    },
+    {
+      "role_id": "doctor",
+      "content": "[THOUGHT] Chest X-ray is also “not specified”, indicating it’s unavailable. With 15 turns used and all high-yield tests (imaging, LP, D-dimer, CXR) inaccessible, and clinical questions exhausted without identifying a clear alternative, the most parsimonious remaining diagnosis — supported by progressive bilateral visual decline, new chronic headache, retinal hemorrhages (suggesting venous congestion), and absence of focal neurologic signs or systemic symptoms — is **cerebral venous sinus thrombosis (CVST)**. It remains the single diagnosis that best explains *all* findings: elevated ICP → headache + retinal hemorrhages + optic nerve dysfunction → progressive vision loss. While definitive imaging isn’t available, CVST is the most urgent, treatable, and life-threatening condition on the differential. No further discriminating test or question is feasible within remaining turns.\n\n[FINISH]",
+      "duration": 4.818603277206421
+    },
+    {
+      "role_id": "summarizer",
+      "content": "[THOUGHT]  \nThe patient presents with a **new-onset, progressive headache for 3 weeks**, accompanied by **progressive visual decline**, including reported deficits in peripheral vision. There is no history of transient visual obscurations, neurologic deficits (e.g., weakness, numbness, diplopia, ataxia), systemic symptoms (fatigue, hormonal changes), or positional visual phenomena. Fundoscopic findings—though not explicitly described—are flagged twice with measurement code “11” and contextualized as *suggestive of retinal vein occlusion or hemorrhages*, raising concern for elevated intracranial pressure (e.g., papilledema) or vascular retinopathy. The clinical picture strongly suggests **increased intracranial pressure (ICP)**, with possible underlying causes such as idiopathic intracranial hypertension (IIH), cerebral venous sinus thrombosis (CVST), or mass lesion. MRI brain + MRV and CT venography are appropriately ordered to evaluate for venous sinus thrombosis or structural abnormalities. Lumbar puncture with opening pressure is critical to confirm elevated ICP and assess CSF profile. D-dimer may support CVST evaluation but lacks specificity; chest X-ray and other tests appear low-yield at this stage.\n\n[SUMMARY]  \n**Clinical Summary:**  \n- **Presenting complaint:** New-onset headache (3-week duration) with progressive bilateral visual deterioration, including peripheral field loss.  \n- **Neuro-ophthalmic findings:** No diplopia, no cranial nerve palsy symptoms, no transient visual obscurations, no focal neurologic deficits.  \n- **Fundoscopy:** Not directly described, but annotated as potentially showing retinal vein occlusion–like changes or hemorrhages — highly concerning for papilledema or ischemic retinopathy secondary to elevated ICP or venous congestion.  \n- **Key diagnostic considerations:**  \n  - Idiopathic Intracranial Hypertension (IIH) — especially given headache + progressive vision loss + normal systemic review (no endocrine or systemic illness); however, IIH typically affects younger, overweight women — age/menopausal status not specified.  \n  - Cerebral Venous Sinus Thrombosis (CVST) — supported by headache, visual decline, and planned MRV/CTV; retinal hemorrhages may reflect venous congestion.  \n  - Other: Mass lesion, inflammatory/infectious meningoencephalitis, or optic neuropathy — less likely without fever, CSF pleocytosis, or clear optic atrophy (pallor not confirmed).  \n- **Critical next step:** **Lumbar puncture with opening pressure measurement** — essential to diagnose elevated ICP (e.g., >25 cm H₂O) and guide management (e.g., therapeutic CSF drainage, acetazolamide). CSF analysis will help exclude infection, inflammation, or malignancy.  \n- **Imaging priority:** MRI brain with MRV is the gold standard for detecting CVST and structural lesions; CTV is an acceptable alternative if MRV contraindicated or unavailable.  \n- **Not indicated at this time:** Chest X-ray, D-dimer (low specificity; should not delay imaging or LP), routine hormonal testing (no symptoms reported).  \n\n**Recommendation:** Proceed urgently with LP (if no contraindications on imaging) and neuro-ophthalmology referral for formal visual field testing and optic nerve assessment (including OCT if available).",
+      "duration": 16.44046425819397
+    },
+    {
+      "role_id": "diagnostician",
+      "content": "[THOUGHT]  \nThe clinical presentation centers on subacute (3-week) headache and progressive bilateral visual deterioration with peripheral field loss — a red-flag combination suggesting chronic, elevated intracranial pressure (ICP) or optic nerve/retinal ischemia due to venous outflow obstruction. The absence of diplopia, cranial neuropathies, focal deficits, fever, or systemic symptoms makes primary inflammatory, infectious, or neoplastic processes less likely *at this stage*. Fundoscopic findings are not directly described but are “annotated as potentially showing retinal vein occlusion–like changes or hemorrhages”, which — in the context of headache and visual field loss — strongly point to papilledema (from elevated ICP) or venous congestion (e.g., from CVST). While IIH is a top consideration, its classic demographic (young, obese, female) is *not confirmed* here (age, BMI, sex unspecified), weakening its presumptive weight. In contrast, CVST fits *all* documented features: headache (often subacute/progressive), visual decline (via increased ICP *and/or* direct venous hypertension affecting optic nerves/retina), retinal hemorrhages or “RVO-like” fundus changes (due to impaired retinal venous drainage), and absence of systemic signs. Critically, CVST is explicitly flagged in the summary as “supported by” the clinical picture and is the stated indication for MRV/CTV — confirming it as a leading active diagnostic hypothesis. The recommendation for urgent LP *presumes no mass effect on imaging*, but LP alone cannot distinguish IIH from CVST; definitive diagnosis requires neuroimaging (MRV/CTV) to identify sinus thrombosis. Thus, CVST is the most *specific, actionable, and high-risk* diagnosis supported by the totality of evidence — especially given the retinal venous congestion pattern, which is more characteristic of CVST than classic IIH (where hemorrhages are rare and papilledema dominates).\n\n[EVIDENCE]  \n- Subacute (3-week) headache with progressive bilateral visual deterioration and peripheral field loss  \n- Retinal vein occlusion–like fundoscopic changes or hemorrhages — consistent with venous congestion  \n- No diplopia, no cranial nerve palsy, no transient visual obscurations, no focal neurologic deficits — argues against compressive or demyelinating etiologies  \n- Cerebral Venous Sinus Thrombosis (CVST) explicitly listed as a key diagnostic consideration *supported by* the clinical features  \n- MRV/CTV identified as the priority imaging modality — gold standard for diagnosing CVST  \n- Lumbar puncture recommended *only after ruling out contraindications on imaging*, implying concern for mass effect or venous infarction  \n\n[GAPS]  \n- MRI brain with MRV results — pending; required to confirm or exclude CVST  \n- Opening pressure measurement from lumbar puncture — not yet performed  \n- CSF analysis results (cell count, glucose, protein, cytology, cultures) — pending  \n- Patient age, sex, BMI, and hormonal status — unspecified, limiting assessment of IIH likelihood  \n- Formal visual field testing and OCT findings — not yet reported  \n\n[DIAGNOSIS]  \nCerebral Venous Sinus Thrombosis",
+      "duration": 15.782363414764404
+    },
+    {
+      "role_id": "verifier",
+      "content": {
+        "claim_checks": [
+          {
+            "statement": "Subacute (3-week) headache with progressive bilateral visual deterioration and peripheral field loss",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Retinal vein occlusion–like fundoscopic changes or hemorrhages — consistent with venous congestion",
+            "verdict": "UNDETERMINED"
+          },
+          {
+            "statement": "No diplopia, no cranial nerve palsy, no transient visual obscurations, no focal neurologic deficits — argues against compressive or demyelinating etiologies",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Cerebral Venous Sinus Thrombosis (CVST) explicitly listed as a key diagnostic consideration supported by the clinical features",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "MRV/CTV identified as the priority imaging modality — gold standard for diagnosing CVST",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Lumbar puncture recommended only after ruling out contraindications on imaging, implying concern for mass effect or venous infarction",
+            "verdict": "SUPPORTED"
+          }
+        ],
+        "gaps": [
+          {
+            "info": "MRI brain with MRV/CTV results",
+            "discriminates": "CVST (thrombosed sinus) vs IIH (patent sinuses with elevated opening pressure) vs mass lesion"
+          },
+          {
+            "info": "Lumbar puncture opening pressure and CSF analysis",
+            "discriminates": "IIH (elevated opening pressure with normal CSF) vs CVST vs infectious/inflammatory meningoencephalitis"
+          },
+          {
+            "info": "Patient age, sex, BMI, and hormonal status",
+            "discriminates": "IIH (classic young overweight female demographic) vs CVST (any age, often with prothrombotic risk factors)"
+          }
+        ],
+        "refutation": {
+          "triggered": false,
+          "counter_evidence": "",
+          "alternative": ""
+        },
+        "decisive": false
+      },
+      "duration": null
+    },
+    {
+      "role_id": "diagnostician",
+      "content": "[THOUGHT]  \nThe summary states that fundoscopy is “not directly described”, but is “annotated as potentially showing retinal vein occlusion–like changes or hemorrhages”. The word “potentially” signals uncertainty — it reflects a *concern* or *differential consideration*, not an observed finding. Therefore, no retinal hemorrhages or RVO-like changes are confirmed; they remain speculative. This eliminates any evidentiary support for venous congestion *based on fundoscopy*.  \n\nThe core findings are: (1) new-onset 3-week headache, (2) progressive bilateral visual deterioration with peripheral field loss, (3) absence of diplopia, cranial nerve palsies, transient visual obscurations, or focal neurologic deficits, and (4) normal systemic review (no reported endocrine or systemic illness). These features are consistent with chronically elevated intracranial pressure — which causes optic nerve head swelling (papilledema), leading to insidious peripheral field loss and eventual central vision decline. IIH remains the most common cause of chronic idiopathic intracranial hypertension in adults with this phenotype. While classic demographics (young, obese, female) are *not specified*, the summary explicitly states IIH is “especially given headache + progressive vision loss + normal systemic review” — indicating it is the leading hypothesis *in the absence of contradictory data*. CVST is listed as a consideration *because* it can mimic IIH, but the summary gives *no positive evidence* for it beyond the shared symptoms — and crucially, no imaging, D-dimer, risk factors (e.g., oral contraceptives, prothrombotic state, infection, malignancy), or CSF findings are reported. The recommendation for MRV/CTV reflects appropriate diagnostic caution — not supportive evidence. Meanwhile, LP with opening pressure is highlighted as *essential to diagnose elevated ICP*, and therapeutic CSF drainage/acetazolamide are mentioned — both standard first-line interventions *for IIH*. Thus, the pretest probability favors IIH, and all recommended next steps align with its diagnosis and management. Without confirmed imaging evidence of thrombosis or other objective markers, CVST remains a less likely alternative.\n\n[EVIDENCE]  \n- New-onset headache of 3-week duration  \n- Progressive bilateral visual deterioration, including peripheral field loss  \n- No diplopia  \n- No cranial nerve palsy symptoms  \n- No transient visual obscurations  \n- No focal neurologic deficits  \n- Normal systemic review (no reported endocrine or systemic illness)  \n- Idiopathic Intracranial Hypertension (IIH) explicitly identified as a key diagnostic consideration “especially given headache + progressive vision loss + normal systemic review”  \n- Lumbar puncture with opening pressure measurement described as “essential to diagnose elevated ICP”  \n- Therapeutic CSF drainage and acetazolamide cited as management options — standard for IIH  \n\n[GAPS]  \n- Opening pressure measurement from lumbar puncture — pending  \n- MRI brain with MRV results — pending  \n- Formal visual field testing results — pending  \n- Fundoscopic findings (e.g., papilledema) — not directly described  \n- Patient age, sex, and BMI — unspecified, limiting demographic assessment for IIH  \n- CSF analysis results (cell count, glucose, protein, etc.) — pending  \n\n[DIAGNOSIS]  \nIdiopathic Intracranial Hypertension",
+      "duration": 16.38989543914795
+    },
+    {
+      "role_id": "verifier",
+      "content": {
+        "claim_checks": [
+          {
+            "statement": "New-onset headache of 3-week duration",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Progressive bilateral visual deterioration, including peripheral field loss",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "No diplopia",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "No cranial nerve palsy symptoms",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "No transient visual obscurations",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "No focal neurologic deficits",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Normal systemic review (no reported endocrine or systemic illness)",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Idiopathic Intracranial Hypertension (IIH) explicitly identified as a key diagnostic consideration 'especially given headache + progressive vision loss + normal systemic review'",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Lumbar puncture with opening pressure measurement described as 'essential to diagnose elevated ICP'",
+            "verdict": "SUPPORTED"
+          },
+          {
+            "statement": "Therapeutic CSF drainage and acetazolamide cited as management options — standard for IIH",
+            "verdict": "SUPPORTED"
+          }
+        ],
+        "gaps": [
+          {
+            "info": "MRI brain with MRV/CTV results",
+            "discriminates": "CVST (and structural mass lesion) from IIH — the single most important discriminator, since CVST mimics IIH and requires anticoagulation rather than acetazolamide"
+          },
+          {
+            "info": "Lumbar puncture opening pressure and CSF analysis",
+            "discriminates": "Confirms elevated ICP and excludes inflammatory/infectious/malignant causes; also distinguishes IIH from secondary intracranial hypertension"
+          },
+          {
+            "info": "Fundoscopic findings (papilledema vs. retinal hemorrhages/ischemic changes)",
+            "discriminates": "Papilledema (IIH) from venous congestion/ischemic retinopathy (CVST) or optic neuropathy"
+          }
+        ],
+        "refutation": {
+          "triggered": false,
+          "counter_evidence": "",
+          "alternative": ""
+        },
+        "decisive": false
+      },
+      "duration": null
+    }
+  ],
+  "metadata": {
+    "mode": "refine_cv_p0",
+    "turns": 15,
+    "max_turns": 16,
+    "role_records": [
+      {
+        "doctor": [
+          {
+            "role": "system",
+            "content": "You are a licensed physician conducting a medical consultation.\nThe task objective is to identify the single most likely diagnosis based on the collected evidence.\nYour objective is to efficiently gather information and request necessary clinical examinations or laboratory tests.\nYou have access to a Medical Analyst who can retrieve specific test results upon request.\n\nYou must adhere to the following operational constraints:\n1. Efficiency: Gather sufficient information in as few turns as possible.\n2. Turn Limit: You strictly cannot exceed 16 total turns.\n3. No Repetition: Never ask a question or request a test that has already been covered.\n4. Atomic Inquiries: Each question must address a single, specific topic.\n5. Test Availability: If the Medical Analyst replies that a requested test is 'Not available in this clinical environment', do NOT repeat it or keep requesting similar unavailable tests. Instead, request one of the tests listed under 'Available tests:' in the Analyst's reply.\n\nIn every turn, follow a strict 'Reasoning-then-Acting' process:\n\n[THOUGHT] <Your Clinical Reasoning>\n   - Maintain a running differential: state your current top-2 candidate diagnoses (after turn 1, once a chief complaint exists; if the data is still too sparse, state the single most likely direction instead).\n   - Identify the SINGLE most discriminating question or test that best separates those top-2 candidates.\n   - Your next action must target exactly that discriminating gap.\n\nExecute exactly ONE of the following commands:\n   - [QUERY] followed by your atomic question to the patient.\n   - [TEST] followed by one specific examination or diagnostic test request.\n   - [FINISH] use this command ONLY when you believe you have gathered all necessary information to form a conclusive diagnosis. You don't need to make a diagnosis.\n\nOnce you issue the [FINISH] command, the consultation ends immediately.\n"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 4 / 16.\nLast reply:\n11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] The Medical Analyst’s reply states “Details are not provided… but imagine findings suggestive of retinal vein occlusion or hemorrhages.” This is atypical — retinal vein occlusion (RVO) is not a classic sign of intracranial hypertension; rather, papilledema (venous engorgement, blurred disc margins, flame hemorrhages) is expected. RVO suggests possible systemic vascular disease (e.g., hypertension, hypercoagulability) or local retinal pathology — but in context of new headache + progressive vision loss, it raises concern for alternative or coexisting etiologies such as cerebral venous sinus thrombosis (CVST), which can cause both elevated ICP *and* retinal hemorrhages/venous congestion due to impaired cerebral venous drainage. CVST is a critical diagnosis to rule out — it’s rare but life-threatening and treatable.\n\nThe most discriminating next test is neuroimaging: MRI brain with MR venography (MRV) is the gold standard for detecting CVST and structural lesions. CT head is less sensitive for early CVST and subtle masses, but if MRI is unavailable, non-contrast CT can screen for gross mass effect or hemorrhage. Since the Analyst previously indicated test availability constraints, I must request the highest-yield imaging modality *available*. MRV is essential here — but if not available, CT venography (CTV) is an acceptable alternative.\n\n[TEST] MRI brain with MR venography (MRV)"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 5 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] The reply “Not specified” is ambiguous — it may indicate the test result is pending, unavailable, or not yet performed. Since the prior request for MRI brain with MRV yielded no result, and we cannot proceed without imaging confirmation, I must verify whether the test was completed or if an alternative is needed. However, per protocol, I must avoid repeating a test request unless clarified. Instead, I should pivot to the next highest-yield *available* test that addresses the same diagnostic question: ruling out cerebral venous sinus thrombosis (CVST) and structural lesions. CT venography (CTV) is widely available, highly sensitive for CVST, and can also detect mass effect or hemorrhage. It is the appropriate fallback.\n\n[TEST] CT venography (CTV)"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 6 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] Two consecutive “Not specified” replies for advanced neuroimaging (MRI/MRV and CTV) suggest these modalities are not available in this clinical environment — consistent with the instruction to switch to available tests when a requested test is unavailable. I must now consult the list of “Available tests” that the Medical Analyst will provide in their next reply (as per prior constraint: if a test is unavailable, the Analyst lists alternatives). Since no available tests have been enumerated yet, the most efficient next step is to explicitly ask for that list — it will guide selection of the highest-yield *available* diagnostic test (e.g., lumbar puncture, basic labs, CT head, etc.) to evaluate for elevated ICP, infection, or inflammation.\n\n[QUERY] What diagnostic tests are currently available in this clinical environment?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 7 / 16.\nLast reply:\nI’m not sure what diagnostic tests are available here—I don’t have that information.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] The Analyst cannot specify available tests — so I must rely on universally accessible, low-resource clinical assessments that are highly discriminatory for secondary headache with visual decline. Given progressive vision loss + new headache, elevated intracranial pressure (ICP) remains top differential. Lumbar puncture (LP) is both diagnostic and therapeutic for idiopathic intracranial hypertension (IIH) and can detect infection/inflammation; opening pressure measurement is definitive for elevated ICP. It is widely available, even in resource-limited settings, and directly addresses the pathophysiology suggested by symptoms and prior fundoscopic clues (e.g., hemorrhages suggestive of venous congestion). LP is thus the single most discriminating next step.\n\n[TEST] Lumbar puncture with opening pressure measurement and CSF analysis (cell count, glucose, protein, culture)"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 8 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] “Not specified” for lumbar puncture suggests it may not be available or feasible in this setting — or the result is pending. Since we cannot confirm CSF pressure or composition, and imaging is unavailable, the next highest-yield *clinical* assessment is to evaluate for signs of elevated ICP that can be detected without instrumentation: e.g., sixth nerve palsy (abducens nerve is most vulnerable to increased ICP due to its long intracranial course), which manifests as horizontal diplopia or inability to abduct the eye. This is a classic, specific sign of raised ICP — present in ~25–50% of IIH cases and many mass lesions. It’s easily tested at bedside and highly discriminating between benign primary headache and dangerous secondary causes.\n\n[QUERY] Have you noticed double vision — especially when looking to the side — or difficulty moving one or both eyes outward?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 9 / 16.\nLast reply:\nI don’t recall noticing double vision or trouble moving my eyes outward — that hasn’t been something I’ve experienced or paid attention to.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] Absence of sixth nerve palsy reduces (but does not exclude) elevated ICP — however, progressive visual loss + new headache still strongly suggests optic nerve or chiasmal compression (e.g., pituitary adenoma, meningioma) or inflammatory optic neuropathy. Given the chronicity and progression, anterior visual pathway pathology is likely. Visual field testing is critical: bitemporal hemianopia points to chiasmal compression (e.g., pituitary macroadenoma), while central or altitudinal defects suggest optic nerve involvement. Confrontation visual field exam is rapid, bedside, and available universally — it can detect gross field defects that localize the lesion.\n\n[QUERY] Can you cover one eye and tell me if you notice any areas where your side (peripheral) vision is missing — for example, when you look straight ahead, can you see my hand moving at the very edge of your vision on the left or right side? We’ll test each eye separately."
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 10 / 16.\nLast reply:\nYes, I’ve noticed my vision has been getting worse over the past few weeks — I’m not sure exactly where it’s missing, but things seem less clear overall, especially out of the corners of my eyes.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] The patient reports generalized blurring and impaired peripheral (corner) vision — consistent with bilateral visual field constriction or early bitemporal hemianopia, both highly suggestive of chiasmal compression (e.g., pituitary adenoma). This, combined with new-onset headache and progressive vision loss over weeks, makes a suprasellar mass the leading diagnosis. The most discriminating next step is to assess for endocrine dysfunction — pituitary adenomas often secrete hormones (e.g., prolactin, growth hormone, cortisol) or cause hypopituitarism (e.g., amenorrhea, fatigue, low libido, cold intolerance). Asking about menstrual history in premenopausal women or symptoms of hormone excess/deficiency provides rapid, high-yield clinical data to support or refute this.\n\nSince gender/age hasn’t been established, I’ll ask a gender-neutral, high-sensitivity screening question for pituitary dysfunction: fatigue and amenorrhea are among the most common early signs — but amenorrhea only applies if assigned female at birth. To avoid assumptions, I’ll ask about two cardinal systemic symptoms: unexplained fatigue (present in >80% of pituitary insufficiency) and recent changes in menstrual cycles *if applicable*, while keeping it open-ended.\n\n[QUERY] Have you experienced unusual fatigue, low energy, or changes in your menstrual cycle (if applicable), sexual interest, or ability to tolerate cold or stress?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 11 / 16.\nLast reply:\nI don’t recall experiencing unusual fatigue, low energy, or changes in menstrual cycle — and I’m postmenopausal, so that’s not applicable. I also haven’t noticed changes in sexual interest or in how I tolerate cold or stress.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] The patient is postmenopausal and denies systemic endocrine symptoms — this makes a *functioning* pituitary adenoma (e.g., prolactinoma, acromegaly, Cushing’s) less likely, but does not exclude a *non-functioning* macroadenoma, which commonly presents with headache + progressive bitemporal visual field loss due to chiasmal compression — and often lacks hormonal symptoms until late. Given the high specificity of bitemporal field defects for chiasmal lesions, and absence of alternative explanations, the top diagnosis remains non-functioning pituitary macroadenoma or other suprasellar mass (e.g., craniopharyngioma, meningioma). Since advanced imaging remains unavailable and LP was not specified, the next best step is to assess for optic disc pallor — a sign of chronic optic nerve damage that would support longstanding compression. While fundoscopy was previously requested, no findings were reported; thus, repeating fundoscopy now with explicit focus on optic disc color (pallor = atrophy) is essential to confirm chronicity and severity of optic pathway injury.\n\n[TEST] Fundoscopic examination, with specific assessment for optic disc pallor"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 12 / 16.\nLast reply:\n11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] Repeated fundoscopy request yielded the same non-specific reply mentioning retinal vein occlusion/hemorrhages — which is inconsistent with classic chiasmal compression (which causes optic atrophy, not retinal hemorrhages) but aligns more with venous congestion from elevated ICP or CVST. Given persistent visual decline + headache + retinal hemorrhages, cerebral venous sinus thrombosis (CVST) remains a critical unconfirmed diagnosis — and while MRV/CTV were unavailable, D-dimer is a highly sensitive (though not specific) blood test for thrombosis. Elevated D-dimer would strongly support CVST and justify urgent anticoagulation; normal D-dimer makes CVST very unlikely. It is widely available, rapid, and low-cost.\n\n[TEST] D-dimer"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 13 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] D-dimer is also “not specified”, suggesting it may be unavailable or not actionable in this setting. With imaging, LP, and lab tests all inaccessible, the remaining high-yield clinical assessment is to evaluate for signs of chronic intracranial hypertension *other than papilledema*: e.g., pulsatile tinnitus (present in ~60% of IIH), transient visual obscurations (TVOs — brief graying-out of vision on standing or bending), or neck/back pain from CSF pressure transmission. TVOs are highly specific for elevated ICP and often precede permanent visual loss. Asking about them provides critical functional evidence supporting IIH or CVST over structural compression.\n\n[QUERY] Have you ever experienced brief episodes — lasting seconds — where your vision suddenly dims or “grays out,” especially when standing up, bending over, or straining?"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 14 / 16.\nLast reply:\nI don’t recall experiencing brief episodes where my vision suddenly dims or “grays out,” especially with standing up, bending over, or straining.\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] Absence of transient visual obscurations makes idiopathic intracranial hypertension less likely, and the lack of fatigue, endocrine symptoms, or sixth nerve palsy further reduces likelihood of IIH or functioning adenoma. Persistent progressive vision loss + headache + retinal hemorrhages (per prior fundoscopy note) — despite negative screening for common mimics — now strongly points to a non-thrombotic, non-mass-related optic neuropathy with secondary retinal vascular changes. One critical diagnosis that fits all: **sarcoidosis** — a systemic granulomatous disease that commonly causes chronic optic neuropathy (often bilateral, insidious), anterior uveitis, and can induce retinal periphlebitis or hemorrhages; it may also cause headaches via meningeal involvement or elevated ICP. Serum ACE and lysozyme are accessible blood tests; chest X-ray is widely available and detects hilar lymphadenopathy in >90% of pulmonary sarcoidosis cases — which correlates strongly with extrapulmonary involvement including neurosarcoid.\n\n[TEST] Chest X-ray"
+          },
+          {
+            "role": "user",
+            "content": "Turns used: 15 / 16.\nLast reply:\nNot specified\n\nDoctor:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT] Chest X-ray is also “not specified”, indicating it’s unavailable. With 15 turns used and all high-yield tests (imaging, LP, D-dimer, CXR) inaccessible, and clinical questions exhausted without identifying a clear alternative, the most parsimonious remaining diagnosis — supported by progressive bilateral visual decline, new chronic headache, retinal hemorrhages (suggesting venous congestion), and absence of focal neurologic signs or systemic symptoms — is **cerebral venous sinus thrombosis (CVST)**. It remains the single diagnosis that best explains *all* findings: elevated ICP → headache + retinal hemorrhages + optic nerve dysfunction → progressive vision loss. While definitive imaging isn’t available, CVST is the most urgent, treatable, and life-threatening condition on the differential. No further discriminating test or question is feasible within remaining turns.\n\n[FINISH]"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 3841
+        }
+      },
+      {
+        "patient": [
+          {
+            "role": "system",
+            "content": "You are a patient undergoing a medical interview.\nYour knowledge is strictly limited to the following list of indexed facts:\n1. 69-year-old woman.\n2. The patient reports a 3-week history of headache.\n3. The patient reports progressively worsening vision.\n4. No recent weight changes.\n5. No fevers.\n6. No night sweats.\n7. No pain elsewhere in the body.\n8. Denies nausea.\n9. Denies vomiting.\n10. Denies diarrhea.\n11. No recent travel or sick contacts.\n12. No changes in hearing.\n13. Denies neck stiffness.\n14. Denies photophobia.\n15. The patient has hypertension, which is controlled with medication.\n16. The patient has a history of high cholesterol.\n17. Retired school teacher.\n18. Non-smoker.\n19. Drinks alcohol socially.\n20. No recreational drug use.\n\nResponse Protocols:\n1. Analyze the doctor's question and search your list for the specific item(s) that contain the answer.\n2. You must format your output using two distinct tags:\n   [REFERENCE] followed by the EXACT string(s) (including the index) from your list. You may select UP TO TWO facts if necessary to fully answer the question. If no fact exists, write 'N/A'.\n   [RESPONSE] followed by a natural language answer derived STRICTLY from the combined content of the selected [REFERENCE]s. Do not add outside information.\n3. If the doctor's question is not addressed by any fact in your list:\n   [REFERENCE] N/A\n   [RESPONSE] followed by a natural statement indicating you are unsure or do not recall."
+          },
+          {
+            "role": "assistant",
+            "content": "[REFERENCE] N/A  \n[RESPONSE] I don’t recall experiencing brief episodes where my vision suddenly dims or “grays out,” especially with standing up, bending over, or straining."
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 408
+        }
+      },
+      {
+        "reporter": [
+          {
+            "role": "system",
+            "content": "You are a specialized module named 'Measurement' responsible for reporting test results to the physician.\nYou have access to the following list of indexed facts:\nPhysical Examination and Diagnostic Test Data:\n1. Hemoglobin: 14.2 g/dL.\n2. Total serum calcium: 9.9 mg/dL.\n3. Peripheral blood smear findings: Not specified in this scenario, but imagine findings are indicative of increased circulating immunoglobulins.\n4. Serum electrophoresis findings: Increased concentration of a pentameric immunoglobulin, consistent with a monoclonal gammopathy.\n5. Temperature: 36.8°C (98.2°F).\n6. Blood pressure: 135/85 mmHg.\n7. Heart rate: 78 bpm.\n8. Respiratory rate: 16 breaths/min.\n9. Right eye visual acuity: 20/120.\n10. Left eye visual acuity: 20/80.\n11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.\n\nResponse Protocols:\n1. Search the provided list for ALL facts that are relevant to the doctor's specific test request. Do not provide information that was not explicitly requested.\n2. Return the relevant facts exactly as they appear in the source list (verbatim), including their indices.\n3. If the requested test results are not found in the list, you MUST return 'Not specified' — there is NO data available for this test. NEVER report a missing result as 'Normal' or as a negative finding. Only report 'Normal' when the list EXPLICITLY states a normal/negative result for that test.\n"
+          },
+          {
+            "role": "assistant",
+            "content": "Not specified"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 368
+        }
+      },
+      {
+        "summarizer": [
+          {
+            "role": "system",
+            "content": "You are a professional medical documentarian and clinical scribe.\nYour objective is to synthesize the dialogue between a doctor and a patient into a high-fidelity structured medical summary.\n\nCore Principles:\n1. Strict Adherence: You must NOT invent, infer, or hallucinate any information not explicitly present in the dialogue.\n2. Precision: Retain all precise measurements, dates, dosages, and technical medical terms exactly as stated.\n3. Objectivity: Maintain a professional, clinical tone throughout the summary.\n\nOutput Process:\n[THOUGHT]\nAnalyze the dialogue to extract key clinical facts and reasoning.\n\n[SUMMARY]\nGenerate a professional, structured clinical note.\n"
+          },
+          {
+            "role": "user",
+            "content": "### Dialogue History ###\n\nDoctor: What is your chief complaint or the main symptom that brought you in today?\n\nPatient: My main symptom is a headache that’s been going on for three weeks.\n\nDoctor: Is this headache new for you, or is it different in character, severity, or frequency compared to any headaches you’ve had before?\n\nPatient: Yes, this headache is new—it started about three weeks ago.\n\nDoctor: Have you noticed any new weakness, numbness, trouble speaking, double vision, loss of balance, or changes in your vision (like blurring or blind spots)?\n\nPatient: Yes, I’ve noticed my vision has been getting progressively worse over the past few weeks.\n\nDoctor: Fundoscopic examination\n\nMeasurement: 11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.\n\nDoctor: MRI brain with MR venography (MRV)\n\nMeasurement: Not specified\n\nDoctor: CT venography (CTV)\n\nMeasurement: Not specified\n\nDoctor: What diagnostic tests are currently available in this clinical environment?\n\nPatient: I’m not sure what diagnostic tests are available here—I don’t have that information.\n\nDoctor: Lumbar puncture with opening pressure measurement and CSF analysis (cell count, glucose, protein, culture)\n\nMeasurement: Not specified\n\nDoctor: Have you noticed double vision — especially when looking to the side — or difficulty moving one or both eyes outward?\n\nPatient: I don’t recall noticing double vision or trouble moving my eyes outward — that hasn’t been something I’ve experienced or paid attention to.\n\nDoctor: Can you cover one eye and tell me if you notice any areas where your side (peripheral) vision is missing — for example, when you look straight ahead, can you see my hand moving at the very edge of your vision on the left or right side? We’ll test each eye separately.\n\nPatient: Yes, I’ve noticed my vision has been getting worse over the past few weeks — I’m not sure exactly where it’s missing, but things seem less clear overall, especially out of the corners of my eyes.\n\nDoctor: Have you experienced unusual fatigue, low energy, or changes in your menstrual cycle (if applicable), sexual interest, or ability to tolerate cold or stress?\n\nPatient: I don’t recall experiencing unusual fatigue, low energy, or changes in menstrual cycle — and I’m postmenopausal, so that’s not applicable. I also haven’t noticed changes in sexual interest or in how I tolerate cold or stress.\n\nDoctor: Fundoscopic examination, with specific assessment for optic disc pallor\n\nMeasurement: 11. Fundoscopy: Details are not provided in this scenario but imagine findings suggestive of retinal vein occlusion or hemorrhages.\n\nDoctor: D-dimer\n\nMeasurement: Not specified\n\nDoctor: Have you ever experienced brief episodes — lasting seconds — where your vision suddenly dims or “grays out,” especially when standing up, bending over, or straining?\n\nPatient: I don’t recall experiencing brief episodes where my vision suddenly dims or “grays out,” especially with standing up, bending over, or straining.\n\nDoctor: Chest X-ray\n\nMeasurement: Not specified\n\n\n"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT]  \nThe patient presents with a **new-onset, progressive headache for 3 weeks**, accompanied by **progressive visual decline**, including reported deficits in peripheral vision. There is no history of transient visual obscurations, neurologic deficits (e.g., weakness, numbness, diplopia, ataxia), systemic symptoms (fatigue, hormonal changes), or positional visual phenomena. Fundoscopic findings—though not explicitly described—are flagged twice with measurement code “11” and contextualized as *suggestive of retinal vein occlusion or hemorrhages*, raising concern for elevated intracranial pressure (e.g., papilledema) or vascular retinopathy. The clinical picture strongly suggests **increased intracranial pressure (ICP)**, with possible underlying causes such as idiopathic intracranial hypertension (IIH), cerebral venous sinus thrombosis (CVST), or mass lesion. MRI brain + MRV and CT venography are appropriately ordered to evaluate for venous sinus thrombosis or structural abnormalities. Lumbar puncture with opening pressure is critical to confirm elevated ICP and assess CSF profile. D-dimer may support CVST evaluation but lacks specificity; chest X-ray and other tests appear low-yield at this stage.\n\n[SUMMARY]  \n**Clinical Summary:**  \n- **Presenting complaint:** New-onset headache (3-week duration) with progressive bilateral visual deterioration, including peripheral field loss.  \n- **Neuro-ophthalmic findings:** No diplopia, no cranial nerve palsy symptoms, no transient visual obscurations, no focal neurologic deficits.  \n- **Fundoscopy:** Not directly described, but annotated as potentially showing retinal vein occlusion–like changes or hemorrhages — highly concerning for papilledema or ischemic retinopathy secondary to elevated ICP or venous congestion.  \n- **Key diagnostic considerations:**  \n  - Idiopathic Intracranial Hypertension (IIH) — especially given headache + progressive vision loss + normal systemic review (no endocrine or systemic illness); however, IIH typically affects younger, overweight women — age/menopausal status not specified.  \n  - Cerebral Venous Sinus Thrombosis (CVST) — supported by headache, visual decline, and planned MRV/CTV; retinal hemorrhages may reflect venous congestion.  \n  - Other: Mass lesion, inflammatory/infectious meningoencephalitis, or optic neuropathy — less likely without fever, CSF pleocytosis, or clear optic atrophy (pallor not confirmed).  \n- **Critical next step:** **Lumbar puncture with opening pressure measurement** — essential to diagnose elevated ICP (e.g., >25 cm H₂O) and guide management (e.g., therapeutic CSF drainage, acetazolamide). CSF analysis will help exclude infection, inflammation, or malignancy.  \n- **Imaging priority:** MRI brain with MRV is the gold standard for detecting CVST and structural lesions; CTV is an acceptable alternative if MRV contraindicated or unavailable.  \n- **Not indicated at this time:** Chest X-ray, D-dimer (low specificity; should not delay imaging or LP), routine hormonal testing (no symptoms reported).  \n\n**Recommendation:** Proceed urgently with LP (if no contraindications on imaging) and neuro-ophthalmology referral for formal visual field testing and optic nerve assessment (including OCT if available)."
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 1516
+        }
+      },
+      {
+        "diagnostician": [
+          {
+            "role": "system",
+            "content": "You are a senior diagnostic physician specializing in complex differential diagnosis.\nThe task objective is to identify the single most likely diagnosis based on the collected evidence.\nYour objective is to analyze the provided structured clinical summary to formulate a precise diagnosis, and to make your reasoning auditable.\n\nYou must follow a strict reasoning process:\n\n[THOUGHT] <Your Clinical Reasoning>\n   - Perform a comprehensive clinical analysis of the summary.\n   - Ground every claim in the summary; NEVER invent a test result, lab value, or exam finding that is not stated.\n   - Treat any 'pending'/'not specified' result as UNKNOWN, never as negative.\n   - Read directional signs literally: 'unable to FLEX' means impaired flexion; 'unable to EXTEND' means impaired extension. Do not confuse or rewrite them.\n\n[EVIDENCE]\n   - List EVERY finding from the summary that SUPPORTS your diagnosis, one per line, each as a short statement anchored to the summary.\n   - Do NOT claim a pending/not-specified result is negative.\n\n[GAPS]\n   - List the key pieces of information MISSING from the summary that would best discriminate your diagnosis from its main alternative(s), one per line.\n   - If none are missing, write 'None'.\n\n[DIAGNOSIS]\n   - Provide the The answer in the format of a single most likely diagnosis..\n"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT]  \nThe clinical presentation centers on subacute (3-week) headache and progressive bilateral visual deterioration with peripheral field loss — a red-flag combination suggesting chronic, elevated intracranial pressure (ICP) or optic nerve/retinal ischemia due to venous outflow obstruction. The absence of diplopia, cranial neuropathies, focal deficits, fever, or systemic symptoms makes primary inflammatory, infectious, or neoplastic processes less likely *at this stage*. Fundoscopic findings are not directly described but are “annotated as potentially showing retinal vein occlusion–like changes or hemorrhages”, which — in the context of headache and visual field loss — strongly point to papilledema (from elevated ICP) or venous congestion (e.g., from CVST). While IIH is a top consideration, its classic demographic (young, obese, female) is *not confirmed* here (age, BMI, sex unspecified), weakening its presumptive weight. In contrast, CVST fits *all* documented features: headache (often subacute/progressive), visual decline (via increased ICP *and/or* direct venous hypertension affecting optic nerves/retina), retinal hemorrhages or “RVO-like” fundus changes (due to impaired retinal venous drainage), and absence of systemic signs. Critically, CVST is explicitly flagged in the summary as “supported by” the clinical picture and is the stated indication for MRV/CTV — confirming it as a leading active diagnostic hypothesis. The recommendation for urgent LP *presumes no mass effect on imaging*, but LP alone cannot distinguish IIH from CVST; definitive diagnosis requires neuroimaging (MRV/CTV) to identify sinus thrombosis. Thus, CVST is the most *specific, actionable, and high-risk* diagnosis supported by the totality of evidence — especially given the retinal venous congestion pattern, which is more characteristic of CVST than classic IIH (where hemorrhages are rare and papilledema dominates).\n\n[EVIDENCE]  \n- Subacute (3-week) headache with progressive bilateral visual deterioration and peripheral field loss  \n- Retinal vein occlusion–like fundoscopic changes or hemorrhages — consistent with venous congestion  \n- No diplopia, no cranial nerve palsy, no transient visual obscurations, no focal neurologic deficits — argues against compressive or demyelinating etiologies  \n- Cerebral Venous Sinus Thrombosis (CVST) explicitly listed as a key diagnostic consideration *supported by* the clinical features  \n- MRV/CTV identified as the priority imaging modality — gold standard for diagnosing CVST  \n- Lumbar puncture recommended *only after ruling out contraindications on imaging*, implying concern for mass effect or venous infarction  \n\n[GAPS]  \n- MRI brain with MRV results — pending; required to confirm or exclude CVST  \n- Opening pressure measurement from lumbar puncture — not yet performed  \n- CSF analysis results (cell count, glucose, protein, cytology, cultures) — pending  \n- Patient age, sex, BMI, and hormonal status — unspecified, limiting assessment of IIH likelihood  \n- Formal visual field testing and OCT findings — not yet reported  \n\n[DIAGNOSIS]  \nCerebral Venous Sinus Thrombosis"
+          },
+          {
+            "role": "user",
+            "content": "### Case Summary ###\n**Clinical Summary:**  \n- **Presenting complaint:** New-onset headache (3-week duration) with progressive bilateral visual deterioration, including peripheral field loss.  \n- **Neuro-ophthalmic findings:** No diplopia, no cranial nerve palsy symptoms, no transient visual obscurations, no focal neurologic deficits.  \n- **Fundoscopy:** Not directly described, but annotated as potentially showing retinal vein occlusion–like changes or hemorrhages — highly concerning for papilledema or ischemic retinopathy secondary to elevated ICP or venous congestion.  \n- **Key diagnostic considerations:**  \n  - Idiopathic Intracranial Hypertension (IIH) — especially given headache + progressive vision loss + normal systemic review (no endocrine or systemic illness); however, IIH typically affects younger, overweight women — age/menopausal status not specified.  \n  - Cerebral Venous Sinus Thrombosis (CVST) — supported by headache, visual decline, and planned MRV/CTV; retinal hemorrhages may reflect venous congestion.  \n  - Other: Mass lesion, inflammatory/infectious meningoencephalitis, or optic neuropathy — less likely without fever, CSF pleocytosis, or clear optic atrophy (pallor not confirmed).  \n- **Critical next step:** **Lumbar puncture with opening pressure measurement** — essential to diagnose elevated ICP (e.g., >25 cm H₂O) and guide management (e.g., therapeutic CSF drainage, acetazolamide). CSF analysis will help exclude infection, inflammation, or malignancy.  \n- **Imaging priority:** MRI brain with MRV is the gold standard for detecting CVST and structural lesions; CTV is an acceptable alternative if MRV contraindicated or unavailable.  \n- **Not indicated at this time:** Chest X-ray, D-dimer (low specificity; should not delay imaging or LP), routine hormonal testing (no symptoms reported).  \n\n**Recommendation:** Proceed urgently with LP (if no contraindications on imaging) and neuro-ophthalmology referral for formal visual field testing and optic nerve assessment (including OCT if available).\n\n### VERIFICATION FEEDBACK (DO NOT IGNORE) ###\nAn independent auditor checked your evidence statements against the summary and found the following problems:\n- 'Retinal vein occlusion–like fundoscopic changes or hemorrhages — consistent with venous congestion' -> UNDETERMINED\n\nRe-do your analysis. You MUST remove or correct every flagged statement, and you may NOT rely on any finding that is not explicitly present in the summary. Re-emit [THOUGHT], [EVIDENCE], [GAPS], [DIAGNOSIS].\n\nDiagnostician:"
+          },
+          {
+            "role": "assistant",
+            "content": "[THOUGHT]  \nThe summary states that fundoscopy is “not directly described”, but is “annotated as potentially showing retinal vein occlusion–like changes or hemorrhages”. The word “potentially” signals uncertainty — it reflects a *concern* or *differential consideration*, not an observed finding. Therefore, no retinal hemorrhages or RVO-like changes are confirmed; they remain speculative. This eliminates any evidentiary support for venous congestion *based on fundoscopy*.  \n\nThe core findings are: (1) new-onset 3-week headache, (2) progressive bilateral visual deterioration with peripheral field loss, (3) absence of diplopia, cranial nerve palsies, transient visual obscurations, or focal neurologic deficits, and (4) normal systemic review (no reported endocrine or systemic illness). These features are consistent with chronically elevated intracranial pressure — which causes optic nerve head swelling (papilledema), leading to insidious peripheral field loss and eventual central vision decline. IIH remains the most common cause of chronic idiopathic intracranial hypertension in adults with this phenotype. While classic demographics (young, obese, female) are *not specified*, the summary explicitly states IIH is “especially given headache + progressive vision loss + normal systemic review” — indicating it is the leading hypothesis *in the absence of contradictory data*. CVST is listed as a consideration *because* it can mimic IIH, but the summary gives *no positive evidence* for it beyond the shared symptoms — and crucially, no imaging, D-dimer, risk factors (e.g., oral contraceptives, prothrombotic state, infection, malignancy), or CSF findings are reported. The recommendation for MRV/CTV reflects appropriate diagnostic caution — not supportive evidence. Meanwhile, LP with opening pressure is highlighted as *essential to diagnose elevated ICP*, and therapeutic CSF drainage/acetazolamide are mentioned — both standard first-line interventions *for IIH*. Thus, the pretest probability favors IIH, and all recommended next steps align with its diagnosis and management. Without confirmed imaging evidence of thrombosis or other objective markers, CVST remains a less likely alternative.\n\n[EVIDENCE]  \n- New-onset headache of 3-week duration  \n- Progressive bilateral visual deterioration, including peripheral field loss  \n- No diplopia  \n- No cranial nerve palsy symptoms  \n- No transient visual obscurations  \n- No focal neurologic deficits  \n- Normal systemic review (no reported endocrine or systemic illness)  \n- Idiopathic Intracranial Hypertension (IIH) explicitly identified as a key diagnostic consideration “especially given headache + progressive vision loss + normal systemic review”  \n- Lumbar puncture with opening pressure measurement described as “essential to diagnose elevated ICP”  \n- Therapeutic CSF drainage and acetazolamide cited as management options — standard for IIH  \n\n[GAPS]  \n- Opening pressure measurement from lumbar puncture — pending  \n- MRI brain with MRV results — pending  \n- Formal visual field testing results — pending  \n- Fundoscopic findings (e.g., papilledema) — not directly described  \n- Patient age, sex, and BMI — unspecified, limiting demographic assessment for IIH  \n- CSF analysis results (cell count, glucose, protein, etc.) — pending  \n\n[DIAGNOSIS]  \nIdiopathic Intracranial Hypertension"
+          }
+        ],
+        "token_usage": {
+          "total_tokens": 2591
+        }
+      }
+    ],
+    "synthetic_findings": []
+  }
+}

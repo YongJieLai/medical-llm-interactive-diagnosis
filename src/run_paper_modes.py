@@ -57,6 +57,11 @@ from eid.scenarios.base import CaseInput  # noqa: E402
 from eid.scenarios import get_scenario, CoTScenario  # noqa: E402
 from eid.scenarios.refine_clean import RefineCleanScenario  # noqa: E402
 from eid.scenarios.refine_cv import RefineCVScenario  # noqa: E402
+from eid.scenarios.refine_cv_p01 import (  # noqa: E402
+    RefineCVP0Scenario,
+    RefineCVP1Scenario,
+    RefineCVP0P1Scenario,
+)
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
@@ -84,6 +89,10 @@ EXTERNAL_MODES = ["medclarify", "mediq_abstention", "uot",
 # 我们改过的方法（refine_cv 系列），在 16 turns / 200 例下重标定。
 REFINE_CV_MODES = {
     "refine_cv": RefineCVScenario,                    # 跨模型 DeepSeek，四检查
+    # P0/P1 最小改动（采集层 DDx 缺口驱动 + 诊断层 base-rate prior），见 refine_cv_p01.py
+    "refine_cv_p0": RefineCVP0Scenario,               # P0: doctor 动态 top-2 区分缺口驱动
+    "refine_cv_p1": RefineCVP1Scenario,               # P1: diagnostician base-rate prior
+    "refine_cv_p0p1": RefineCVP0P1Scenario,           # P0+P1 联合
     "refine_cv_qwen": RefineCVQwenScenario,           # 同模型 qwen，四检查
     "refine_cv_no_decisive": RefineCVNoDecisiveScenario,      # 跨模型，三检查(去 decisive)
     "refine_cv_qwen_no_decisive": RefineCVQwenNoDecisiveScenario,  # 同模型，三检查(去 decisive)
