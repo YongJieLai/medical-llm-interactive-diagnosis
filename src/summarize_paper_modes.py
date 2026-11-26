@@ -36,6 +36,10 @@ REFINE_CV_MODES = [
     "refine_cv_qwen_gap_refute",
     "react_cv",
     "roleplay_cv",
+    "refine_cv_staged",
+    "refine_cv_staged_k4",
+    "refine_cv_staged_k8",
+    "refine_cv_cover",
 ]
 
 # 外部论文方法（零训练移植 baseline）
@@ -158,6 +162,10 @@ def main():
         "refine_cv_qwen_gap_refute": "CV gap+refute",
         "react_cv": "ReAct + CEV-GR四检查",
         "roleplay_cv": "Roleplay + CEV-GR四检查",
+        "refine_cv_staged": "两阶段(K=6)",
+        "refine_cv_staged_k4": "两阶段(K=4)",
+        "refine_cv_staged_k8": "两阶段(K=8)",
+        "refine_cv_cover": "广覆盖采集(方案A)",
         "medclarify": "MedClarify(DEIG)",
         "mediq_abstention": "MEDIQ(abstention)",
         "uot": "UoT(信息增益)",

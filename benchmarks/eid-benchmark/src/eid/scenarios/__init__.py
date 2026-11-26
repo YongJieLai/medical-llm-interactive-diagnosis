@@ -18,6 +18,12 @@ from eid.scenarios.refine_cv_p01 import (
     RefineCVP1Scenario,
     RefineCVP0P1Scenario,
 )
+from eid.scenarios.refine_cv_staged import (
+    RefineCVStagedScenario,
+    RefineCVStagedK4Scenario,
+    RefineCVStagedK8Scenario,
+)
+from eid.scenarios.refine_cv_cover import RefineCVCoverScenario
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
 from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
@@ -65,6 +71,9 @@ __all__ = [
     "RefineCVP0Scenario",
     "RefineCVP1Scenario",
     "RefineCVP0P1Scenario",
+    "RefineCVStagedScenario",
+    "RefineCVStagedK4Scenario",
+    "RefineCVStagedK8Scenario",
     "RefineCVQwenScenario",
     "ReactCVScenario",
     "RoleplayCVScenario",
@@ -138,6 +147,10 @@ def get_scenario(
         "refine_cv_p0": RefineCVP0Scenario,
         "refine_cv_p1": RefineCVP1Scenario,
         "refine_cv_p0p1": RefineCVP0P1Scenario,
+        "refine_cv_staged": RefineCVStagedScenario,
+        "refine_cv_staged_k4": RefineCVStagedK4Scenario,
+        "refine_cv_staged_k8": RefineCVStagedK8Scenario,
+        "refine_cv_cover": RefineCVCoverScenario,
         "refine_cv_qwen": RefineCVQwenScenario,
         "react_cv": ReactCVScenario,
         "react_cv2": ReactCV2Scenario,
@@ -225,7 +238,7 @@ def get_scenario(
             diagnostician_config=diagnostician_config,
             verifier_config=verifier_config,
         )
-    elif mode in ("refine_cv", "refine_cv_p0", "refine_cv_p1", "refine_cv_p0p1", "react_cv", "react_cv2", "roleplay_cv"):
+    elif mode in ("refine_cv", "refine_cv_p0", "refine_cv_p1", "refine_cv_p0p1", "refine_cv_staged", "refine_cv_staged_k4", "refine_cv_staged_k8", "react_cv", "react_cv2", "roleplay_cv"):
         return scenario_class(
             dataset_name=dataset_name,
             doctor_config=doctor_config,

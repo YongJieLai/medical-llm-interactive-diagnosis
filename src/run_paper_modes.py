@@ -62,6 +62,12 @@ from eid.scenarios.refine_cv_p01 import (  # noqa: E402
     RefineCVP1Scenario,
     RefineCVP0P1Scenario,
 )
+from eid.scenarios.refine_cv_staged import (  # noqa: E402
+    RefineCVStagedScenario,
+    RefineCVStagedK4Scenario,
+    RefineCVStagedK8Scenario,
+)
+from eid.scenarios.refine_cv_cover import RefineCVCoverScenario  # noqa: E402
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
@@ -93,6 +99,12 @@ REFINE_CV_MODES = {
     "refine_cv_p0": RefineCVP0Scenario,               # P0: doctor 动态 top-2 区分缺口驱动
     "refine_cv_p1": RefineCVP1Scenario,               # P1: diagnostician base-rate prior
     "refine_cv_p0p1": RefineCVP0P1Scenario,           # P0+P1 联合
+    # 两阶段采集（用户提案：前期被动探索 → 关键节点主动区分），阈值扫描 K=4/6/8
+    "refine_cv_staged": RefineCVStagedScenario,       # K=6（前 6 问被动，之后主动 top-2 区分）
+    "refine_cv_staged_k4": RefineCVStagedK4Scenario,  # K=4
+    "refine_cv_staged_k8": RefineCVStagedK8Scenario,  # K=8
+    # 主战场方案 A：广覆盖采集（去效率优先 + 8 维证据框架），见 docs/main-battlefield-cover-driven-collection.md
+    "refine_cv_cover": RefineCVCoverScenario,
     "refine_cv_qwen": RefineCVQwenScenario,           # 同模型 qwen，四检查
     "refine_cv_no_decisive": RefineCVNoDecisiveScenario,      # 跨模型，三检查(去 decisive)
     "refine_cv_qwen_no_decisive": RefineCVQwenNoDecisiveScenario,  # 同模型，三检查(去 decisive)

@@ -35,6 +35,7 @@ INTERACTIVE = ["roleplay", "react", "sc", "refine",
                "refine_cv", "refine_cv_qwen", "refine_cv_no_decisive",
                "refine_cv_qwen_no_decisive", "refine_cv_qwen_check",
                "refine_cv_qwen_gap", "refine_cv_qwen_gap_refute",
+               "refine_cv_cover",
                "medclarify", "mediq_abstention", "uot",
                "medclarify_minq", "mediq_minq"]
 
