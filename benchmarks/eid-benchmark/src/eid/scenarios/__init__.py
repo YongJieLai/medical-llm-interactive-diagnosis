@@ -24,6 +24,7 @@ from eid.scenarios.refine_cv_staged import (
     RefineCVStagedK8Scenario,
 )
 from eid.scenarios.refine_cv_cover import RefineCVCoverScenario
+from eid.scenarios.refine_cv_freebudget import RefineCVFreebudgetScenario
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
 from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
@@ -74,6 +75,8 @@ __all__ = [
     "RefineCVStagedScenario",
     "RefineCVStagedK4Scenario",
     "RefineCVStagedK8Scenario",
+    "RefineCVCoverScenario",
+    "RefineCVFreebudgetScenario",
     "RefineCVQwenScenario",
     "ReactCVScenario",
     "RoleplayCVScenario",
@@ -151,6 +154,7 @@ def get_scenario(
         "refine_cv_staged_k4": RefineCVStagedK4Scenario,
         "refine_cv_staged_k8": RefineCVStagedK8Scenario,
         "refine_cv_cover": RefineCVCoverScenario,
+        "refine_cv_freebudget": RefineCVFreebudgetScenario,
         "refine_cv_qwen": RefineCVQwenScenario,
         "react_cv": ReactCVScenario,
         "react_cv2": ReactCV2Scenario,

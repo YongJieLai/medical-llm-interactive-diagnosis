@@ -68,6 +68,7 @@ from eid.scenarios.refine_cv_staged import (  # noqa: E402
     RefineCVStagedK8Scenario,
 )
 from eid.scenarios.refine_cv_cover import RefineCVCoverScenario  # noqa: E402
+from eid.scenarios.refine_cv_freebudget import RefineCVFreebudgetScenario  # noqa: E402
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
@@ -105,6 +106,8 @@ REFINE_CV_MODES = {
     "refine_cv_staged_k8": RefineCVStagedK8Scenario,  # K=8
     # 主战场方案 A：广覆盖采集（去效率优先 + 8 维证据框架），见 docs/main-battlefield-cover-driven-collection.md
     "refine_cv_cover": RefineCVCoverScenario,
+    # 公平性消融：只去效率优先、不加框架（隔离"多问" vs "框架"两个变量的贡献）
+    "refine_cv_freebudget": RefineCVFreebudgetScenario,
     "refine_cv_qwen": RefineCVQwenScenario,           # 同模型 qwen，四检查
     "refine_cv_no_decisive": RefineCVNoDecisiveScenario,      # 跨模型，三检查(去 decisive)
     "refine_cv_qwen_no_decisive": RefineCVQwenNoDecisiveScenario,  # 同模型，三检查(去 decisive)

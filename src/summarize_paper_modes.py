@@ -40,6 +40,7 @@ REFINE_CV_MODES = [
     "refine_cv_staged_k4",
     "refine_cv_staged_k8",
     "refine_cv_cover",
+    "refine_cv_freebudget",
 ]
 
 # 外部论文方法（零训练移植 baseline）
@@ -166,6 +167,7 @@ def main():
         "refine_cv_staged_k4": "两阶段(K=4)",
         "refine_cv_staged_k8": "两阶段(K=8)",
         "refine_cv_cover": "广覆盖采集(方案A)",
+        "refine_cv_freebudget": "去效率无框架(消融)",
         "medclarify": "MedClarify(DEIG)",
         "mediq_abstention": "MEDIQ(abstention)",
         "uot": "UoT(信息增益)",
