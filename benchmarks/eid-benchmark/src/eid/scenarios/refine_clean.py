@@ -71,6 +71,15 @@ class RefineCleanScenario(BaseScenario):
         self.verifier_config = verifier_config or doctor_config
         self.prompts = PromptManager(dataset_name)
 
+    def _doctor_system_prompt(self) -> str:
+        """Doctor system prompt (SC evidence-gatherer). Extension point for subclasses.
+
+        Default returns the verbatim upstream SC doctor prompt (behavior unchanged).
+        Subclasses override this to alter the collection strategy (e.g. refine_cover)
+        without touching the rest of the REFINE pipeline.
+        """
+        return self.prompts.get_sc_doctor_system_prompt()
+
     def run(self, case_input: CaseInput) -> ScenarioResult:
         """Execute REFINE scenario on a single case.
 
@@ -87,7 +96,7 @@ class RefineCleanScenario(BaseScenario):
         # Create agents
         doctor = create_agent(
             role_id="doctor",
-            system_prompt=self.prompts.get_sc_doctor_system_prompt().format(
+            system_prompt=self._doctor_system_prompt().format(
                 max_turns=self.max_turns
             ),
             config=self.doctor_config,

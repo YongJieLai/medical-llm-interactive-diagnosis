@@ -24,6 +24,7 @@ from eid.scenarios.refine_cv_staged import (
     RefineCVStagedK8Scenario,
 )
 from eid.scenarios.refine_cv_cover import RefineCVCoverScenario
+from eid.scenarios.refine_cover import RefineCoverScenario
 from eid.scenarios.refine_cv_freebudget import RefineCVFreebudgetScenario
 from eid.scenarios.refine_cv_cover_plan import RefineCVCoverPlanScenario
 from eid.scenarios.refine_cv_debias import (
@@ -164,6 +165,7 @@ def get_scenario(
         "refine_cv_staged_k4": RefineCVStagedK4Scenario,
         "refine_cv_staged_k8": RefineCVStagedK8Scenario,
         "refine_cv_cover": RefineCVCoverScenario,
+        "refine_cover": RefineCoverScenario,
         "refine_cv_freebudget": RefineCVFreebudgetScenario,
         "refine_cv_cover_plan": RefineCVCoverPlanScenario,
         "refine_cv_debias": RefineCVDebiasScenario,

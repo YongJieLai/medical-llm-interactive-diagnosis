@@ -68,6 +68,7 @@ from eid.scenarios.refine_cv_staged import (  # noqa: E402
     RefineCVStagedK8Scenario,
 )
 from eid.scenarios.refine_cv_cover import RefineCVCoverScenario  # noqa: E402
+from eid.scenarios.refine_cover import RefineCoverScenario  # noqa: E402
 from eid.scenarios.refine_cv_freebudget import RefineCVFreebudgetScenario  # noqa: E402
 from eid.scenarios.refine_cv_cover_plan import RefineCVCoverPlanScenario  # noqa: E402
 from eid.scenarios.refine_cv_debias import (  # noqa: E402
@@ -112,6 +113,9 @@ REFINE_CV_MODES = {
     "refine_cv_staged_k8": RefineCVStagedK8Scenario,  # K=8
     # 主战场方案 A：广覆盖采集（去效率优先 + 8 维证据框架），见 docs/main-battlefield-cover-driven-collection.md
     "refine_cv_cover": RefineCVCoverScenario,
+    # 消融：无 CEV-GR 的广覆盖（refine clean 底座 + 去效率 + 8维框架），
+    # 回答"方案A的+6.5pp里 8维框架是否依赖 CEV-GR 四门控"，见 docs/discriminating-key-exam-definition.md 相关讨论
+    "refine_cover": RefineCoverScenario,
     # 公平性消融：只去效率优先、不加框架（隔离"多问" vs "框架"两个变量的贡献）
     "refine_cv_freebudget": RefineCVFreebudgetScenario,
     # 主战场方案 B：方案 A + 证据类别缺口采集规划器（前移 gap check），对照 A vs A+B
@@ -224,12 +228,14 @@ def run_one(mode, cfg, max_turns, item, out_dir):
     t0 = time.time()
     try:
         result = scenario.run(ci)
+        metadata = dict(result.metadata or {})
+        metadata["mode"] = mode
         rec = {
             "case_id": item.case_id,
             "prediction": result.answer,
             "ground_truth": item.answer,
             "trace": result.trace,
-            "metadata": result.metadata,
+            "metadata": metadata,
         }
         fn.write_text(json.dumps(rec, ensure_ascii=False, indent=2))
         return "OK", item.case_id
