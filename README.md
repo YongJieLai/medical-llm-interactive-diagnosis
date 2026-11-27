@@ -39,7 +39,7 @@ roleplay 49.0% ──+8维框架(+4.5)──► 53.5% ──+CEV-GR(+10.5)──
 
 | 方法 | 机制 | 准确率 |
 |---|---|---|
-| cot | 静态全信息（上界） | 94.0% |
+| cot | 静态全信息（上界） | 85.5% |
 | **refine_cv_cover（方案A = 完整插件）** | 8维框架 + CEV-GR | **65.0%** |
 | roleplay_cover | 方案A 移植到 roleplay 底座 | 64.0% |
 | refine_cover | 消融：8维框架（无 CEV-GR） | 60.0% |
@@ -110,3 +110,5 @@ python3 src/analyze_coverage.py refine_cv_cover
 先读 **[docs/core-narrative.md](docs/core-narrative.md)**（主线）和 **[docs/experiments-ledger.md](docs/experiments-ledger.md)**（总账）。
 
 > ⚠️ 诚实标注：oracle_key 80%、「关键检查覆盖率」42.3%/61.1%/59.6% 等数字**依赖旧 confirmatory 定义，已作废**，待按判别性定义重标注后重算（见 core-narrative.md §3.4、§7）。
+>
+> ⚠️ 诚实标注（cot 上界口径修正）：本表 cot 静态上界为 **85.5%（171/200）**。早期曾出现 94.0%（188/200），系 `analyze_coverage.py` 把 cot 的 `THOUGHT+DIAGNOSIS` **全文**喂给 `deterministic_judge` 判分——规则层"truth 是 pred 子串"命中 CoT 思考过程中提到的正确病名即判对（如模型 THOUGHT 里讨论过热射病、最终却写"神经阻滞剂恶性综合征"，也被算对）。正确口径是 `summarize_paper_modes.py` 先 `extract_cot_diagnosis` 提取 `DIAGNOSIS:` 后的最终诊断再判分。94.0% 已作废。

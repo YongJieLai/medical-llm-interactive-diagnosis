@@ -21,7 +21,7 @@
 
 | # | mode | 中文名/说明 | 场景代码文件 | percase/结果文件 | 准确率 |
 |---|---|---|---|---|---|
-| 1 | cot | CoT 静态全信息（上界） | `cot.py` | `percase_cot.json` | **94.0%** |
+| 1 | cot | CoT 静态全信息（上界） | `cot.py` | `percase_cot.json` | **85.5%** |
 | 2 | refine_cv_cover | **方案A：去效率 + 8维框架** | `refine_cv_cover.py` | `percase_refine_cv_cover.json` | **65.0%** |
 | 2a | roleplay_cover | 方案A移植：roleplay底座 + 8维框架 + CEV-GR | `refine_cv_cover_ports.py` | `percase_roleplay_cover.json` | **64.0%** |
 | 2b | refine_cover | 消融：去效率 + 8维框架（无 CEV-GR） | `refine_cover.py` | `percase_refine_cover.json` | **60.0%** |
@@ -60,6 +60,7 @@
 | 32 | uot | UoT（信息增益） | `uot.py` | `percase_uot.json` | 26.0% |
 
 > staged（#17/20/21）准确率来自 `docs/two-stage-explore-exploit-results.md`，无 percase 文件；其余来自 percase `correct` 字段。
+> ⚠️ cot 例外：`percase_cot.json` 的 `correct` 字段是把 cot 的 `THOUGHT+DIAGNOSIS` 全文喂给 judge 判的（规则层子串命中思考过程病名 → 94.0% 掺水），本表已改用 `summarize_paper_modes.py` 先 `extract_cot_diagnosis` 提取最终诊断再判的 **85.5%（171/200）**，与 `paper-5mode-16turns-200.md` 一致。
 
 ---
 
@@ -69,7 +70,7 @@
 
 | mode | 说明 | 场景代码 | 准确率 |
 |---|---|---|---|
-| cot | 静态全信息上界 | `cot.py` | 94.0% |
+| cot | 静态全信息上界 | `cot.py` | 85.5% |
 | sc | 总结诊断 | `sc.py` | 59.0% |
 | refine | REFINE 基线（无 CEV-GR） | `refine_clean.py` | 55.0% |
 | react | ReAct | `react.py` | 53.0% |
