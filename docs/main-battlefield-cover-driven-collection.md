@@ -103,10 +103,11 @@ doctor 从清单里定向采集**未覆盖的证据类别**。
 
 ## 6. 下一步实验（按顺序）
 
-1. **[已完成] 方案 A**：`RefineCVCoverScenario`（广覆盖版 doctor），200 例 / 16 turns。**正结果**：覆盖率中位 31%→50%（+19pp）、≥50% case 7.5%→51.5%、准确率 +6.5pp（McNemar p=0.124）。详见 `cover-collection-results.md`。
-2. **[下一步] 方案 B**：在方案 A 基础上加"证据类别缺口"采集规划器（前移 gap check），对照 A vs A+B，主看覆盖率中位与"错误组覆盖率"（当前仍 43.4% vs 正确组 53.7%）。
-3. **层 2 去偏置**：在 A+B 底座叠加 base-rate prior，治 overdiagnosis 14–16%。
-4. **方案 C**：仅在 A+B 验证"覆盖→准确"因果后启动。
+1. **[已完成] 方案 A**：`RefineCVCoverScenario`（广覆盖版 doctor），200 例 / 16 turns。**正结果**：覆盖率中位 31%→50%（+19pp）、≥50% case 7.5%→51.5%、准确率 +6.5pp。公平性审计：提升全部来自 8 维框架（框架 +15 例 vs 多问 −2 例）。详见 `cover-collection-results.md` + `cover-collection-fairness.md`。
+2. **[已完成] 方案 B**：在方案 A 上加"证据类别缺口"采集规划器。**负结果**：覆盖率持平 50%、准确率 −10 例；根因=规划器的 question 滑回 discriminate。详见 `cover-plan-results.md`。
+3. **[下一步] 方案 B′**：规划器只输出 `{category, why}`（不输出 question），隔离"缺口识别价值" vs "问题生成害处"。B′ 回升→问题在 question 层；B′ 持平→采集层已达静态框架天花板，转向诊断层。
+4. **层 2 去偏置**：在采集底座叠加 base-rate prior，治 overdiagnosis 14–16%。
+5. **方案 C**：仅在"覆盖→准确"因果打通后启动。
 
 ---
 
