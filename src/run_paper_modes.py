@@ -260,7 +260,9 @@ def main():
     else:
         modes = [mode_arg]
 
-    dataset = load_dataset("medqa")
+    # 数据路径可选覆盖（默认用 segmented；面板补全实验传 DATASET_PATH=...panel.jsonl）
+    dataset_path = os.environ.get("DATASET_PATH", "")
+    dataset = load_dataset("medqa", path=dataset_path if dataset_path else None)
     items = list(dataset)[:n]
 
     # 分片支持（拆多进程并行跑剩余 case）：SHARD_TOTAL 片里只跑 SHARD_ID 那一片。
@@ -272,9 +274,13 @@ def main():
 
     cfg = ModelConfig.from_string("qwen-plus")
 
+    # 输出目录后缀可选（面板补全实验传 OUT_SUFFIX=_panel，避免覆盖原始结果）
+    out_suffix = os.environ.get("OUT_SUFFIX", "")
+
     for mode in modes:
+        out_mode = mode + out_suffix
         out_dir = (
-            EID_ROOT / "results" / "medqa" / mode
+            EID_ROOT / "results" / "medqa" / out_mode
             / "qwen-plus" / f"{max_turns}_turns" / "record"
         )
         out_dir.mkdir(parents=True, exist_ok=True)
