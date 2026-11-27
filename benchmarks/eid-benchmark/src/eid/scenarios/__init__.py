@@ -33,6 +33,8 @@ from eid.scenarios.refine_cv_debias import (
 )
 from eid.scenarios.refine_cv_discrim import RefineCVDiscrimScenario
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
+from eid.scenarios.refine_cv_cover_ports import ReactCoverScenario, RoleplayCoverScenario
+from eid.scenarios.sc_cover import SCCoverScenario
 from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
 from eid.scenarios.refine_ht import RefineHTScenario
@@ -175,6 +177,9 @@ def get_scenario(
         "react_cv": ReactCVScenario,
         "react_cv2": ReactCV2Scenario,
         "roleplay_cv": RoleplayCVScenario,
+        "react_cover": ReactCoverScenario,
+        "roleplay_cover": RoleplayCoverScenario,
+        "sc_cover": SCCoverScenario,
         "refine_ht": RefineHTScenario,
         "refine_cv_qwen_check": RefineCVQwenCheckOnlyScenario,
         "refine_cv_qwen_gap": RefineCVQwenGapOnlyScenario,
@@ -215,7 +220,7 @@ def get_scenario(
         reporter_config = doctor_config
 
     # SC and REFINE modes need additional configs
-    if mode == "sc":
+    if mode in ("sc", "sc_cover"):
         return scenario_class(
             dataset_name=dataset_name,
             doctor_config=doctor_config,
@@ -258,7 +263,7 @@ def get_scenario(
             diagnostician_config=diagnostician_config,
             verifier_config=verifier_config,
         )
-    elif mode in ("refine_cv", "refine_cv_p0", "refine_cv_p1", "refine_cv_p0p1", "refine_cv_staged", "refine_cv_staged_k4", "refine_cv_staged_k8", "react_cv", "react_cv2", "roleplay_cv"):
+    elif mode in ("refine_cv", "refine_cv_p0", "refine_cv_p1", "refine_cv_p0p1", "refine_cv_staged", "refine_cv_staged_k4", "refine_cv_staged_k8", "react_cv", "react_cv2", "roleplay_cv", "react_cover", "roleplay_cover"):
         return scenario_class(
             dataset_name=dataset_name,
             doctor_config=doctor_config,

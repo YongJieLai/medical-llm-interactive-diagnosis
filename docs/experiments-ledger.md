@@ -23,7 +23,8 @@
 |---|---|---|---|---|---|
 | 1 | cot | CoT 静态全信息（上界） | `cot.py` | `percase_cot.json` | **94.0%** |
 | 2 | refine_cv_cover | **方案A：去效率 + 8维框架** | `refine_cv_cover.py` | `percase_refine_cv_cover.json` | **65.0%** |
-| 2a | refine_cover | 消融：去效率 + 8维框架（无 CEV-GR） | `refine_cover.py` | `percase_refine_cover.json` | **60.0%** |
+| 2a | roleplay_cover | 方案A移植：roleplay底座 + 8维框架 + CEV-GR | `refine_cv_cover_ports.py` | `percase_roleplay_cover.json` | **64.0%** |
+| 2b | refine_cover | 消融：去效率 + 8维框架（无 CEV-GR） | `refine_cover.py` | `percase_refine_cover.json` | **60.0%** |
 | 3 | refine_cv_qwen_no_decisive | CV同模型三检查 | `refine_cv_ablations.py` | `percase_refine_cv_qwen_no_decisive.json` | 60.0% |
 | 4 | refine_cv_cover_plan | 方案B：A + 采集规划器 | `refine_cv_cover_plan.py` | `percase_refine_cv_cover_plan.json` | 59.8% |
 | 5 | refine_cv_debias | 诊断层去偏置（分级强制） | `refine_cv_debias.py` | `percase_refine_cv_debias.json` | 59.8% |
@@ -40,6 +41,7 @@
 | 16 | roleplay_cv | roleplay 底座 + 四检查 | `refine_cv_ports.py` | `percase_roleplay_cv.json` | 57.5% |
 | 17 | refine_cv_staged_k4 | 两阶段 K=4 | `refine_cv_staged.py` | record 目录 | 55.5% |
 | 18 | refine | **REFINE 基线（无 CEV-GR）** | `refine_clean.py` | `percase_refine.json` | 55.0% |
+| 18a | sc_cover | 8维框架（无CEV-GR，SC summarizer管线） | `sc_cover.py` | `percase_sc_cover.json` | 56.5% |
 | 19 | refine_cv_discrim | 方案C1：判别优先 | `refine_cv_discrim.py` | `percase_refine_cv_discrim.json` | 55.0% |
 | 20 | refine_cv_staged | 两阶段 K=6 | `refine_cv_staged.py` | record 目录 | 54.5% |
 | 21 | refine_cv_staged_k8 | 两阶段 K=8 | `refine_cv_staged.py` | record 目录 | 54.5% |
@@ -47,6 +49,7 @@
 | 23 | react | ReAct | `react.py` | `percase_react.json` | 53.0% |
 | 24 | refine_cv_p0p1 | P0+P1 联合 | `refine_cv_p01.py` | `percase_refine_cv_p0p1.json` | 52.0% |
 | 25 | roleplay | roleplay（交互基线） | `roleplay.py` | `percase_roleplay.json` | 49.0% |
+| 25a | react_cover | 方案A移植：react底座 + 8维框架 + CEV-GR | `refine_cv_cover_ports.py` | `percase_react_cover.json` | 50.0% |
 | 26 | react_cv | ReAct 底座 + 四检查 | `refine_cv_ports.py` | `percase_react_cv.json` | 46.5% |
 | 27 | react_cv2 | ReAct + 专用 CEV-GR | `react_cv2.py` | `percase_react_cv2.json` | 45.0% |
 | 28 | mediq_minq | MEDIQ（强制问4轮） | `mediq_abstention.py` | `percase_mediq_minq.json` | 44.7% |
@@ -122,10 +125,30 @@
 | medclarify | MedClarify DEIG | `medclarify.py` | 28.0% |
 | uot | UoT 信息增益 | `uot.py` | 26.0% |
 
-### 2.7 跨底座移植（CEV-GR 通用性）
+### 2.7 跨底座移植（CEV-GR 通用性 + 方案A完整插件）
+
+**完整插件（8维框架 + CEV-GR）跨底座对照**（本次补齐）：
+
+| 底座 | 原样 | +CEV-GR | +8维框架(无CEV-GR) | 完整插件(8维+CEV-GR) | 判定 |
+|---|---|---|---|---|---|
+| refine | 55.0% | 58.5% (refine_cv) | 60.0% (refine_cover) | **65.0%** (refine_cv_cover) | ✅ +10.0 |
+| roleplay | 49.0% | 57.5% (roleplay_cv) | — | **64.0%** (roleplay_cover) | ✅ **+15.0** |
+| sc | 59.0% | 58.5% (==refine_cv) | **56.5%** (sc_cover) | 65.0% (==refine_cv_cover) | ⚠️ 8维框架−2.5 |
+| react | 53.0% | 46.5% (react_cv) | — | **50.0%** (react_cover) | ❌ −3.0 |
+
+**三个新发现（本次移植实验的核心产出）**：
+
+1. **roleplay 底座大胜（64.0%，+15.0pp）**：完整插件在 roleplay 上从 49% 拉到 64%，**几乎追平 refine 底座（65.0%）**。8维框架在 roleplay 上又贡献 +6.5pp（57.5→64.0），与它在 refine 底座上的贡献一致。→ **8维框架 + CEV-GR 是底座无关的、可加的两组件插件**，泛化性坐实。
+
+2. **sc 底座暴露 8维框架的诊断管线依赖（56.5%，−2.5pp）**：sc_cover（8维框架 + SC summarizer 一步诊断管线，无 CEV-GR）比 sc 原样 59.0% **还低 2.5pp**，而 refine_cover（同样的 8维框架，但在 refine 验证环管线上）比 refine 原样 +5.0pp。→ **8维框架的采集增益需要"验证环（gap-driven 补问）"来消化广覆盖证据**；在 SC 的一步式 summarizer+diagnostician 管线上，广覆盖反而稀释了 summary，略有害。
+
+3. **react 底座结构性不兼容再次确认（50.0%，−3.0pp）**：react_cover（8维框架+CEV-GR）比 react 原样 53.0% 仍低 3.0pp，但比 react_cv（46.5%）回升 3.5pp。→ 8维框架部分缓解了 CEV-GR 在 react 上的 give_up 损伤，但 react 的"采集-诊断耦合 + [DIAGNOSIS]=终点"结构性冲突仍主导，无法逆转。
 
 | mode | 说明 | 场景代码 | 准确率 |
 |---|---|---|---|
+| roleplay_cover | roleplay + 8维框架 + 四检查 | `refine_cv_cover_ports.py` | **64.0%** |
+| sc_cover | sc + 8维框架（无CEV-GR，summarizer管线） | `sc_cover.py` | 56.5% |
+| react_cover | ReAct + 8维框架 + 四检查 | `refine_cv_cover_ports.py` | 50.0% |
 | roleplay_cv | roleplay + 四检查 | `refine_cv_ports.py` | 57.5% |
 | react_cv | ReAct + 四检查 | `refine_cv_ports.py` | 46.5% |
 | react_cv2 | ReAct + 专用 CEV-GR | `react_cv2.py` | 45.0% |

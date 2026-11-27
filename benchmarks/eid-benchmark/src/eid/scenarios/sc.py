@@ -25,6 +25,18 @@ class SCScenario(BaseScenario):
     produces the final diagnosis based on the summary.
     """
 
+    # Result metadata tag. Subclasses override this (e.g. "sc_cover").
+    MODE = "sc"
+
+    def _doctor_system_prompt(self) -> str:
+        """Doctor system prompt. Extension point for subclasses.
+
+        Default returns the SC evidence-gatherer doctor (behavior unchanged).
+        Subclasses override this to alter the collection strategy (e.g. sc_cover)
+        without touching the summarizer -> diagnostician pipeline.
+        """
+        return self.prompts.get_sc_doctor_system_prompt()
+
     def __init__(
         self,
         dataset_name: str,
@@ -71,7 +83,7 @@ class SCScenario(BaseScenario):
         # Create agents
         doctor = create_agent(
             role_id="doctor",
-            system_prompt=self.prompts.get_sc_doctor_system_prompt().format(
+            system_prompt=self._doctor_system_prompt().format(
                 max_turns=self.max_turns
             ),
             config=self.doctor_config,
@@ -219,7 +231,7 @@ class SCScenario(BaseScenario):
             answer=answer,
             trace=trace,
             metadata={
-                "mode": "sc",
+                "mode": self.MODE,
                 "turns": current_turn,
                 "max_turns": self.max_turns,
                 "summary": summary,

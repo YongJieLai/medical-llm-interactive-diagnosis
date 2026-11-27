@@ -41,6 +41,25 @@ _COMPREHENSIVE_LINE = (
 _TURN_ANCHOR = "In every turn, follow a strict 'Reasoning-then-Acting' process:"
 
 
+def _apply_cover_edits(base: str, turn_anchor: str) -> str:
+    """对任意底座的 doctor prompt 应用方案A的三处采集层改动。
+
+    参数：
+        base: 底座的 doctor system prompt（含 {max_turns} 占位符）
+        turn_anchor: 该底座注入 8 维框架的锚点行（各底座的 "In every turn, ..." 不同）
+    """
+    # 1) 效率优先 -> 广覆盖
+    base = base.replace(_EFFICIENCY_LINE, _COMPREHENSIVE_LINE)
+    # 2) "objective ... efficiently" -> comprehensively（一致性）
+    base = base.replace(
+        "Your objective is to efficiently gather information and request necessary",
+        "Your objective is to comprehensively gather information and request necessary",
+    )
+    # 3) 在 turn anchor 之前注入 8 维证据框架
+    base = base.replace(turn_anchor, _EVIDENCE_FRAMEWORK + "\n" + turn_anchor)
+    return base
+
+
 class RefineCVCoverScenario(RefineCVScenario):
     """广覆盖采集 + 原样四检查门控。"""
 
@@ -48,15 +67,4 @@ class RefineCVCoverScenario(RefineCVScenario):
 
     def _doctor_system_prompt(self) -> str:
         base = super()._doctor_system_prompt()  # SC evidence-gatherer doctor（含 {max_turns} 占位符）
-        # 1) 效率优先 -> 广覆盖
-        base = base.replace(_EFFICIENCY_LINE, _COMPREHENSIVE_LINE)
-        # 2) "objective ... efficiently" -> comprehensively（一致性）
-        base = base.replace(
-            "Your objective is to efficiently gather information and request necessary",
-            "Your objective is to comprehensively gather information and request necessary",
-        )
-        # 3) 在 Reasoning-then-Acting 之前注入 8 维证据框架
-        base = base.replace(
-            _TURN_ANCHOR, _EVIDENCE_FRAMEWORK + "\n" + _TURN_ANCHOR
-        )
-        return base
+        return _apply_cover_edits(base, _TURN_ANCHOR)

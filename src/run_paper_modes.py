@@ -77,6 +77,8 @@ from eid.scenarios.refine_cv_debias import (  # noqa: E402
 )
 from eid.scenarios.refine_cv_discrim import RefineCVDiscrimScenario  # noqa: E402
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
+from eid.scenarios.refine_cv_cover_ports import ReactCoverScenario, RoleplayCoverScenario  # noqa: E402
+from eid.scenarios.sc_cover import SCCoverScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
 from eid.scenarios.refine_cv_ablations import (  # noqa: E402
@@ -135,9 +137,15 @@ REFINE_CV_MODES = {
     "react_cv": ReactCVScenario,        # ReAct 底座 + 四检查（通用移植，掉点）
     "react_cv2": ReactCV2Scenario,      # ReAct 底座 + 专用 CEV-GR（method-agnostic 门控）
     "roleplay_cv": RoleplayCVScenario,  # base 底座 + 四检查
+    # 方案A（8维框架 + CEV-GR）完整移植到其它底座，见 docs/experiments-ledger.md §2.7
+    "roleplay_cover": RoleplayCoverScenario,  # base 底座 + 去效率 + 8维框架 + 四检查
+    "react_cover": ReactCoverScenario,        # ReAct 底座 + 去效率 + 8维框架 + 四检查
 }
 
-ALL_MODES = PAPER_MODES + list(REFINE_CV_MODES.keys()) + EXTERNAL_MODES
+# SC 底座 + 8维框架（无 CEV-GR，保留 summarizer 管线）：走 get_scenario 工厂构造
+SC_COVER_MODES = ["sc_cover"]
+
+ALL_MODES = PAPER_MODES + list(REFINE_CV_MODES.keys()) + EXTERNAL_MODES + SC_COVER_MODES
 
 
 def make_scenario(mode: str, cfg: "ModelConfig", max_turns: int):
