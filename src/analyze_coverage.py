@@ -51,6 +51,8 @@ REFINE_CV_MODES = [
     "refine_cv_cover",
     "refine_cv_freebudget",
     "refine_cv_cover_plan",
+    "refine_cv_debias",
+    "refine_cv_cover_debias",
 ]
 ALL_MODES = PAPER_MODES + REFINE_CV_MODES + ["medclarify", "mediq_abstention", "uot",
                                                "medclarify_minq", "mediq_minq"]

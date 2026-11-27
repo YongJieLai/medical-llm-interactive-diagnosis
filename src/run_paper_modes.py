@@ -70,6 +70,10 @@ from eid.scenarios.refine_cv_staged import (  # noqa: E402
 from eid.scenarios.refine_cv_cover import RefineCVCoverScenario  # noqa: E402
 from eid.scenarios.refine_cv_freebudget import RefineCVFreebudgetScenario  # noqa: E402
 from eid.scenarios.refine_cv_cover_plan import RefineCVCoverPlanScenario  # noqa: E402
+from eid.scenarios.refine_cv_debias import (  # noqa: E402
+    RefineCVDebiasScenario,
+    RefineCVCoverDebiasScenario,
+)
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
@@ -111,6 +115,9 @@ REFINE_CV_MODES = {
     "refine_cv_freebudget": RefineCVFreebudgetScenario,
     # 主战场方案 B：方案 A + 证据类别缺口采集规划器（前移 gap check），对照 A vs A+B
     "refine_cv_cover_plan": RefineCVCoverPlanScenario,
+    # 诊断层去偏置（方案 1：诊断分级强制，治 overdiagnosis），见 docs/error-distribution-and-improvement.md
+    "refine_cv_debias": RefineCVDebiasScenario,            # 基线 + 分级强制（对照 P1 base-rate prior）
+    "refine_cv_cover_debias": RefineCVCoverDebiasScenario,  # 方案A + 分级强制（完整方法）
     "refine_cv_qwen": RefineCVQwenScenario,           # 同模型 qwen，四检查
     "refine_cv_no_decisive": RefineCVNoDecisiveScenario,      # 跨模型，三检查(去 decisive)
     "refine_cv_qwen_no_decisive": RefineCVQwenNoDecisiveScenario,  # 同模型，三检查(去 decisive)
