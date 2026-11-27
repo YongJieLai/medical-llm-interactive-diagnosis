@@ -44,6 +44,7 @@ REFINE_CV_MODES = [
     "refine_cv_cover_plan",
     "refine_cv_debias",
     "refine_cv_cover_debias",
+    "refine_cv_discrim",
 ]
 
 # 外部论文方法（零训练移植 baseline）
@@ -174,6 +175,7 @@ def main():
         "refine_cv_cover_plan": "方案A+采集规划(方案B)",
         "refine_cv_debias": "诊断分级强制(去偏置)",
         "refine_cv_cover_debias": "方案A+分级强制(完整方法)",
+        "refine_cv_discrim": "判别性采集(方案C1)",
         "medclarify": "MedClarify(DEIG)",
         "mediq_abstention": "MEDIQ(abstention)",
         "uot": "UoT(信息增益)",

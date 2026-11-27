@@ -30,6 +30,7 @@ from eid.scenarios.refine_cv_debias import (
     RefineCVDebiasScenario,
     RefineCVCoverDebiasScenario,
 )
+from eid.scenarios.refine_cv_discrim import RefineCVDiscrimScenario
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
 from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
@@ -85,6 +86,7 @@ __all__ = [
     "RefineCVCoverPlanScenario",
     "RefineCVDebiasScenario",
     "RefineCVCoverDebiasScenario",
+    "RefineCVDiscrimScenario",
     "RefineCVQwenScenario",
     "ReactCVScenario",
     "RoleplayCVScenario",
@@ -166,6 +168,7 @@ def get_scenario(
         "refine_cv_cover_plan": RefineCVCoverPlanScenario,
         "refine_cv_debias": RefineCVDebiasScenario,
         "refine_cv_cover_debias": RefineCVCoverDebiasScenario,
+        "refine_cv_discrim": RefineCVDiscrimScenario,
         "refine_cv_qwen": RefineCVQwenScenario,
         "react_cv": ReactCVScenario,
         "react_cv2": ReactCV2Scenario,
