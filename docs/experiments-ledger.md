@@ -46,6 +46,7 @@
 | 20 | refine_cv_staged | 两阶段 K=6 | `refine_cv_staged.py` | record 目录 | 54.5% |
 | 21 | refine_cv_staged_k8 | 两阶段 K=8 | `refine_cv_staged.py` | record 目录 | 54.5% |
 | 22 | refine_cv_p0 | P0：主动 top-2 | `refine_cv_p01.py` | `percase_refine_cv_p0.json` | 54.0% |
+| 22a | roleplay_cover_abl | 消融：roleplay底座 + 8维框架（无CEV-GR） | `roleplay_cover_abl.py` | `percase_roleplay_cover_abl.json` | 53.5% |
 | 23 | react | ReAct | `react.py` | `percase_react.json` | 53.0% |
 | 24 | refine_cv_p0p1 | P0+P1 联合 | `refine_cv_p01.py` | `percase_refine_cv_p0p1.json` | 52.0% |
 | 25 | roleplay | roleplay（交互基线） | `roleplay.py` | `percase_roleplay.json` | 49.0% |
@@ -132,13 +133,13 @@
 | 底座 | 原样 | +CEV-GR | +8维框架(无CEV-GR) | 完整插件(8维+CEV-GR) | 判定 |
 |---|---|---|---|---|---|
 | refine | 55.0% | 58.5% (refine_cv) | 60.0% (refine_cover) | **65.0%** (refine_cv_cover) | ✅ +10.0 |
-| roleplay | 49.0% | 57.5% (roleplay_cv) | — | **64.0%** (roleplay_cover) | ✅ **+15.0** |
+| roleplay | 49.0% | 57.5% (roleplay_cv) | 53.5% (roleplay_cover_abl) | **64.0%** (roleplay_cover) | ✅ **+15.0** |
 | sc | 59.0% | 58.5% (==refine_cv) | **56.5%** (sc_cover) | 65.0% (==refine_cv_cover) | ⚠️ 8维框架−2.5 |
 | react | 53.0% | 46.5% (react_cv) | — | **50.0%** (react_cover) | ❌ −3.0 |
 
 **三个新发现（本次移植实验的核心产出）**：
 
-1. **roleplay 底座大胜（64.0%，+15.0pp）**：完整插件在 roleplay 上从 49% 拉到 64%，**几乎追平 refine 底座（65.0%）**。8维框架在 roleplay 上又贡献 +6.5pp（57.5→64.0），与它在 refine 底座上的贡献一致。→ **8维框架 + CEV-GR 是底座无关的、可加的两组件插件**，泛化性坐实。
+1. **roleplay 底座大胜（64.0%，+15.0pp）**：完整插件在 roleplay 上从 49% 拉到 64%，**几乎追平 refine 底座（65.0%）**。8维框架独立贡献 **+4.5pp**（49.0→53.5，`roleplay_cover_abl` 补跑），与 refine 底座上的 +5.0pp 一致；两组件单独贡献之和（+4.5+8.5=+13.0）< 完整插件（+15.0），存在约 +2.0pp 正协同。→ **8维框架 + CEV-GR 是底座无关的、可加的两组件插件**，泛化性坐实。
 
 2. **sc 底座暴露 8维框架的诊断管线依赖（56.5%，−2.5pp）**：sc_cover（8维框架 + SC summarizer 一步诊断管线，无 CEV-GR）比 sc 原样 59.0% **还低 2.5pp**，而 refine_cover（同样的 8维框架，但在 refine 验证环管线上）比 refine 原样 +5.0pp。→ **8维框架的采集增益需要"验证环（gap-driven 补问）"来消化广覆盖证据**；在 SC 的一步式 summarizer+diagnostician 管线上，广覆盖反而稀释了 summary，略有害。
 
@@ -147,6 +148,7 @@
 | mode | 说明 | 场景代码 | 准确率 |
 |---|---|---|---|
 | roleplay_cover | roleplay + 8维框架 + 四检查 | `refine_cv_cover_ports.py` | **64.0%** |
+| roleplay_cover_abl | roleplay + 8维框架（无CEV-GR） | `roleplay_cover_abl.py` | 53.5% |
 | sc_cover | sc + 8维框架（无CEV-GR，summarizer管线） | `sc_cover.py` | 56.5% |
 | react_cover | ReAct + 8维框架 + 四检查 | `refine_cv_cover_ports.py` | 50.0% |
 | roleplay_cv | roleplay + 四检查 | `refine_cv_ports.py` | 57.5% |
@@ -178,6 +180,17 @@ refine_cover (60.0%)  ──+CEV-GR四门控(+5.0)──►  cover/方案A (65.0
 - 8 维框架离开 CEV-GR 仍值 +5.0pp（不是贴着 refine 的协同依赖）→ **框架有独立贡献**。
 - CEV-GR 在 cover 底座上值 +5.0pp，比它在 refine 底座上的 +3.5pp 还略高 → **两者叠加有轻微正协同**（框架采来的广覆盖证据，被门控消化得更充分）。
 - 总账：5.0 + 5.0 = 10.0pp，正好等于 refine→cover 的总增益（+10.0pp）。
+
+**roleplay 底座同样闭合**（`roleplay_cover_abl` 补跑，53.5%）：
+
+```
+roleplay (49.0%) ──+8维框架(+4.5)──► roleplay_cover_abl (53.5%)
+                                        └─+CEV-GR(+10.5)──► roleplay_cover (64.0%)
+roleplay (49.0%) ──+CEV-GR(+8.5)──► roleplay_cv (57.5%)
+```
+
+- 8维框架在 roleplay 底座上的独立贡献 **+4.5pp**，与 refine 底座 +5.0pp 一致 → 采集组件底座无关。
+- 两组件单独贡献之和 +13.0pp < 完整插件 +15.0pp → 存在约 **+2.0pp 正协同**（弱基线补短板时协同更明显）。
 
 ---
 

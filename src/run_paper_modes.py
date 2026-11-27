@@ -78,6 +78,7 @@ from eid.scenarios.refine_cv_debias import (  # noqa: E402
 from eid.scenarios.refine_cv_discrim import RefineCVDiscrimScenario  # noqa: E402
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario  # noqa: E402
 from eid.scenarios.refine_cv_cover_ports import ReactCoverScenario, RoleplayCoverScenario  # noqa: E402
+from eid.scenarios.roleplay_cover_abl import RoleplayCoverAblScenario  # noqa: E402
 from eid.scenarios.sc_cover import SCCoverScenario  # noqa: E402
 from eid.scenarios.react_cv2 import ReactCV2Scenario  # noqa: E402
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario  # noqa: E402
@@ -145,7 +146,10 @@ REFINE_CV_MODES = {
 # SC 底座 + 8维框架（无 CEV-GR，保留 summarizer 管线）：走 get_scenario 工厂构造
 SC_COVER_MODES = ["sc_cover"]
 
-ALL_MODES = PAPER_MODES + list(REFINE_CV_MODES.keys()) + EXTERNAL_MODES + SC_COVER_MODES
+# roleplay 底座 + 8维框架（无 CEV-GR，继承 RoleplayScenario 无验证环）：走 get_scenario 工厂构造
+ROLEPLAY_ABL_MODES = ["roleplay_cover_abl"]
+
+ALL_MODES = PAPER_MODES + list(REFINE_CV_MODES.keys()) + EXTERNAL_MODES + SC_COVER_MODES + ROLEPLAY_ABL_MODES
 
 
 def make_scenario(mode: str, cfg: "ModelConfig", max_turns: int):

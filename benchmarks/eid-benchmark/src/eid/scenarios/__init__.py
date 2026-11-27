@@ -34,6 +34,7 @@ from eid.scenarios.refine_cv_debias import (
 from eid.scenarios.refine_cv_discrim import RefineCVDiscrimScenario
 from eid.scenarios.refine_cv_ports import ReactCVScenario, RoleplayCVScenario
 from eid.scenarios.refine_cv_cover_ports import ReactCoverScenario, RoleplayCoverScenario
+from eid.scenarios.roleplay_cover_abl import RoleplayCoverAblScenario
 from eid.scenarios.sc_cover import SCCoverScenario
 from eid.scenarios.react_cv2 import ReactCV2Scenario
 from eid.scenarios.refine_cv_qwen import RefineCVQwenScenario
@@ -179,6 +180,7 @@ def get_scenario(
         "roleplay_cv": RoleplayCVScenario,
         "react_cover": ReactCoverScenario,
         "roleplay_cover": RoleplayCoverScenario,
+        "roleplay_cover_abl": RoleplayCoverAblScenario,
         "sc_cover": SCCoverScenario,
         "refine_ht": RefineHTScenario,
         "refine_cv_qwen_check": RefineCVQwenCheckOnlyScenario,

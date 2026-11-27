@@ -47,6 +47,13 @@ class RoleplayScenario(BaseScenario):
         self.max_turns = max_turns
         self.prompts = PromptManager(dataset_name)
 
+    def _doctor_system_prompt(self) -> str:
+        """Return the doctor system prompt template (with {max_turns} placeholder).
+
+        Override point for plugin scenarios that patch the collection prompt.
+        """
+        return self.prompts.get_base_doctor_system_prompt()
+
     def run(self, case_input: CaseInput) -> ScenarioResult:
         """Execute roleplay scenario on a single case.
 
@@ -63,7 +70,7 @@ class RoleplayScenario(BaseScenario):
         # Create agents
         doctor = create_agent(
             role_id="doctor",
-            system_prompt=self.prompts.get_base_doctor_system_prompt().format(
+            system_prompt=self._doctor_system_prompt().format(
                 max_turns=self.max_turns
             ),
             config=self.doctor_config,
